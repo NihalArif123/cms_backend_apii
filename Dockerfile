@@ -1,0 +1,39 @@
+# Use an official Python runtime as the base image
+FROM python:3.10-slim
+
+# Update and upgrade libraries, and remove apt cache
+RUN apt-get clean all && apt-get update && apt-get upgrade -y && apt-get install make libaio1 && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Create a new user and group
+RUN groupadd -r hgtd && useradd -r -g hgtd hgtd
+
+WORKDIR /home/hgtd
+# Copy the requirements file to the working directory
+
+COPY . .
+
+RUN dpkg -i oracle-instantclient19.19-basic_19.19.0.0.0-2_amd64.deb && apt-get install -f
+
+# Update pip without caching anything
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt 
+
+# Set ownership of the working directory to the new user
+RUN chown -R hgtd:hgtd /home/hgtd
+
+# Switch to the new user
+USER hgtd
+
+# Set environment variables (modify as needed)
+#ENV DJANGO_SETTINGS_MODULE=icms_teams.settings
+#ENV PYTHONUNBUFFERED=1
+
+# Expose the port on which the Django app will run (modify if needed)
+EXPOSE 8000/tcp
+
+# Run the Django development server when the container starts
+
+# Set the entrypoint to execute "make" with arguments
+ENTRYPOINT ["make"]
+
+# Set the default command to "run"
+CMD ["run-gunicorn"]
