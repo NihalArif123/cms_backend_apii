@@ -1,13 +1,12 @@
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework import permissions
 from .models import *
-from django.views.decorators.csrf import csrf_exempt
 from .serializers import *
-from rest_framework.parsers import JSONParser
-from django.http.response import JsonResponse
 from caad_api import services
 
-@api_view(['GET', 'POST','PUT','DELETE'])
+
 def studentApi(request,std_cnic=0):
     if request.method=="GET":
         students = Student.objects.all()
@@ -31,7 +30,7 @@ def studentApi(request,std_cnic=0):
         student=Student.objects.get(std_cnic=std_cnic)
         student.delete()
         return JsonResponse("Deleted sucessfully",safe=False)
-@csrf_exempt
+
 def studentRegistrationApi(request,std_cnic=0):
     if request.method=="GET":
         studentsReg = StudentRegistration.objects.all()
@@ -57,7 +56,7 @@ def studentRegistrationApi(request,std_cnic=0):
         studentReg.delete()
         return JsonResponse("Deleted sucessfully",safe=False)
 
-@csrf_exempt
+
 def studentRegistrationApi(request,std_cnic=0):
     if request.method=="GET":
         studentsReg = StudentRegistration.objects.all()
@@ -82,7 +81,7 @@ def studentRegistrationApi(request,std_cnic=0):
         studentReg=StudentRegistration.objects.get(std_cnic=std_cnic)
         studentReg.delete()
         return JsonResponse("Deleted sucessfully",safe=False)
-@csrf_exempt
+
 def CaadRegistrationVerificationApi(request,caad_registration_verification=0):
     if request.method=="GET":
         CaadRegistrationVerifications_data = CaadRegistrationVerification.objects.all()
@@ -108,7 +107,7 @@ def CaadRegistrationVerificationApi(request,caad_registration_verification=0):
         CaadRegistrationVerifications_data.delete()
         return JsonResponse("Deleted sucessfully",safe=False)
 
-@csrf_exempt
+
 def InternshipsApi(request,internship_id=0):
     if request.method=="GET":
         Internships_data = Internships.objects.all()
@@ -151,7 +150,7 @@ def InternshipsApi(request,internship_id=0):
         Internshipdata.delete()
         return JsonResponse("Deleted sucessfully",safe=False)
 
-@csrf_exempt
+
 def EvaluationProformaApi(request,evaluation_id=0):
     if request.method=="GET":
         Evaluations_data = EvaluationProforma.objects.all()
@@ -199,7 +198,7 @@ def EvaluationProformaApi(request,evaluation_id=0):
         Evaluationsdata.delete()
         return JsonResponse("Deleted sucessfully",safe=False)
 
-@csrf_exempt
+
 def NcpPublicationsApi(request,ncppublications_id=0):
     if request.method=="GET":
         Publications_data = NcpPublications.objects.all()
@@ -225,7 +224,7 @@ def NcpPublicationsApi(request,ncppublications_id=0):
         Publicationsdata.delete()
         return JsonResponse("Deleted sucessfully",safe=False)
 
-@csrf_exempt
+
 def CaadEvaluationVerificationApi(request,caad_evaluation_id=0):
     if request.method=="GET":
         CaadEvaluationVerifications_data = CaadEvaluationVerification.objects.all()
@@ -250,7 +249,7 @@ def CaadEvaluationVerificationApi(request,caad_evaluation_id=0):
         CaadEvaluationVerifications_data=CaadEvaluationVerification.objects.get(caad_evaluation_id=caad_evaluation_id)
         CaadEvaluationVerifications_data.delete()
         return JsonResponse("Deleted sucessfully",safe=False)
-@csrf_exempt
+
 def ClearancePerformaApi(request,clearance_id=0):
     if request.method=="GET":
         ClearancePerforma_data = ClearancePerforma.objects.all()
@@ -292,7 +291,7 @@ def ClearancePerformaApi(request,clearance_id=0):
         ClearancePerforma_data.delete()
         return JsonResponse("Deleted sucessfully",safe=False)
 
-@csrf_exempt
+
 def NcpDuesApi(request,dues_id=0):
     if request.method=="GET":
         NcpDues_data = NcpDues.objects.all()
@@ -317,7 +316,7 @@ def NcpDuesApi(request,dues_id=0):
         NcpDues_data=NcpDues.objects.get(dues_id=dues_id)
         NcpDues_data.delete()
         return JsonResponse("Deleted sucessfully",safe=False)
-@csrf_exempt
+
 def CaadClearanceVerificationApi(request,caad_clearance_id=0):
     if request.method=="GET":
         CaadClearanceVerifications_data = CaadClearanceVerification.objects.all()
@@ -343,89 +342,130 @@ def CaadClearanceVerificationApi(request,caad_clearance_id=0):
         CaadClearanceVerifications_data.delete()
         return JsonResponse("Deleted sucessfully",safe=False)
 
-@csrf_exempt
-def IdentitycardProformaApi(request,id=0):
-    if request.method=='GET':
-        identitycard=IdentitycardProforma.objects.all()
-        identitycard_serializer=IdentitycardProformaSerializer(identitycard,many=True)
-        return JsonResponse(identitycard_serializer.data,safe=False)
-    elif request.method=='POST':
-        identitycard_data=JSONParser().parse(request)
-        try:
-            std_cnic = identitycard_data['std_cnic']
-        except KeyError:
-            return JsonResponse({"message": "Missing 'std_cnic' field in the request data"}, status=400)
-        internship_id=services.get_internship(std_cnic)
-        identitycard_data['internship'] = internship_id
-        identitycard_serializer=IdentitycardProformaSerializer(data=identitycard_data)
-        if identitycard_serializer.is_valid():
-            identity=identitycard_serializer.save()
-            caad_identity_verification_data = {
-                'identity': identity.identity_id,
-            }
-            caad_identity_verification_serializer = CaadIdentityVerificationSerializer(
-                data=caad_identity_verification_data
+class IdentitycardApi(APIView):
+    def get(self, request, *args, **kwargs):
+        identity = IdentitycardProforma.objects.all()
+        if not identity:
+            return Response(
+                {"res": "Identity Card not found"},
+                status=status.HTTP_400_BAD_REQUEST
             )
-            if caad_identity_verification_serializer.is_valid():
-                caad_identity_verification_serializer.save() 
-            return JsonResponse({"message": "Added successfully"})
-        return JsonResponse("no added sucessfully",safe=False)
-    elif request.method=='PUT':
-        identitycard_data=JSONParser().parse(request)
-        identitycard=IdentitycardProforma.objects.get(identity_performa_id=identitycard_data['identity_id'])
-        identitycard_serializer=IdentitycardProformaSerializer(identitycard,data=identitycard_data)
-        if identitycard_serializer.is_valid():
-            identitycard_serializer.save()
-            return JsonResponse("Updated the identity card successfuly",safe=False)
-        return JsonResponse("Failed to update")
-    elif request.method=='DELETE':
-        identitycard=IdentitycardProforma.objects.get(identity_id=id)
-        identitycard.delete()
-        return JsonResponse("Deleted identity card Successfully, yay",safe=False)
+        identity_serializer = IdentitycardProformaSerializer(identity, many=True)
+        return Response(identity_serializer.data, status=status.HTTP_200_OK)
+    def post(self, request, *args, **kwargs):
+        identity_data = request.data
+        try:
+            std_cnic = identity_data['std_cnic']
+        except KeyError:
+            return Response({"message": "Missing std_cnic"}, status=400)
+
+        internship=services.get_internship(std_cnic)
+        identity_data['internship'] = internship
+        identity_serializer = IdentitycardProformaSerializer(data=identity_data)
+        if identity_serializer.is_valid():
+            identity_serializer.save()
+            return Response(identity_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(identity_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            identity = IdentitycardProforma.objects.get(pk=pk)
+        except identity.DoesNotExist:
+            return Response(
+                {"res": "Identity card not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        identity_serializer = IdentitycardProformaSerializer(identity, data=request.data)
+        if identity_serializer.is_valid():
+            identity_serializer.save()
+            return Response(identity_serializer.data, status=status.HTTP_200_OK)
+        return Response(identity_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            identity = IdentitycardProforma.objects.get(pk=pk)
+        except identity.DoesNotExist:
+            return Response(
+                {"res": "Identity Card not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        identity.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@csrf_exempt
-def CaadIdentityApi(request,id=0):
-    if request.method=='GET':
-        caadidentity=CaadIdentityVerification.objects.all()
-        caadidentity_serializer=CaadIdentityVerificationSerializer(caadidentity,many=True)
-        return JsonResponse(caadidentity_serializer.data,safe=False)
-    elif request.method=='POST':
-        caadidentity_data=JSONParser().parse(request)
-        caadidentity_serializer=CaadIdentityVerificationSerializer(data=caadidentity_data)
+
+class CaadIdentityApi(APIView):
+    def get(self, request, *args, **kwargs):
+        caadidentity = CaadIdentityVerification.objects.all()
+        if not caadidentity:
+            return Response(
+                {"res": "Caad Identity Verification not found"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        caadidentity_serializer = CaadIdentityVerificationSerializer(caadidentity, many=True)
+        return Response(caadidentity_serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        caadidentity_data = request.data
+        try:
+            std_cnic = caadidentity_data['std_cnic']
+        except KeyError:
+            return Response({"message": "Missing std_cnic"}, status=400)
+
+        internship=services.get_internship(std_cnic)
+        identity=services.get_identity(internship)
+        caadidentity_data['identity_id']=identity
+        caadidentity_serializer = CaadIdentityVerificationSerializer(data=caadidentity_data)
         if caadidentity_serializer.is_valid():
             caadidentity_serializer.save()
-            return JsonResponse("Added a CAAD Identity Verification Successfully",safe=False)
-        return JsonResponse("Failed to add CAAD Verification",safe=False)
-    elif request.method=='PUT':
-        caadidentity_data=JSONParser().parse(request)
-        caadidentity=CaadIdentityVerification.objects.get(caad_identity_id=caadidentity_data['caad_identity_id'])
-        caadidentity_serializer=CaadIdentityVerificationSerializer(caadidentity,data=caadidentity_data)
+            return Response(caadidentity_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(caadidentity_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            caadidentity = CaadIdentityVerification.objects.get(pk=pk)
+        except CaadIdentityVerification.DoesNotExist:
+            return Response(
+                {"res": "CAAD identity verification not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        caadidentity_serializer = CaadIdentityVerificationSerializer(caadidentity, data=request.data)
         if caadidentity_serializer.is_valid():
             caadidentity_serializer.save()
-            return JsonResponse("Updated the caad identity verification successfuly",safe=False)
-        return JsonResponse("Failed to update caad identity verification")
-    elif request.method=='DELETE':
-        caadidentity=CaadIdentityVerification.objects.get(caad_identity_id=id)
+            return Response(caadidentity_serializer.data, status=status.HTTP_200_OK)
+        return Response(caadidentity_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            caadidentity = CaadIdentityVerification.objects.get(pk=pk)
+        except CaadIdentityVerification.DoesNotExist:
+            return Response(
+                {"res": "CAAD Identity Verification not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
         caadidentity.delete()
-        return JsonResponse("Deleted caad identity verification Successfully, yay",safe=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@csrf_exempt
-def LateSittingApi(request,id=0):
-    if request.method=='GET':
+class LateSittingApi(APIView):
+    def get(self, request, *args, **kwargs):
         latesitting=LateSittingProforma.objects.all()
+        if not latesitting:
+            return Response(
+                {"res": "Late Sitting Proforma not found"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         latesitting_serializer=LateSittingProformaSerializer(latesitting,many=True)
-        return JsonResponse(latesitting_serializer.data,safe=False)
-    elif request.method=='POST':
-        latesitting_data=JSONParser().parse(request)
+        return Response(latesitting_serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        latesitting_data = request.data
         try:
             std_cnic = latesitting_data['std_cnic']
         except KeyError:
-            return JsonResponse({"message": "Missing 'std_cnic' field in the request data"}, status=400)
-        internship_id=services.get_internship(std_cnic)
-        latesitting_data['internship']=internship_id
-        latesitting_serializer=LateSittingProformaSerializer(data=latesitting_data)
+            return Response({"message": "Missing std_cnic"}, status=400)
+        internship=services.get_internship(std_cnic)
+        latesitting_data['internship']=internship
+        latesitting_serializer = LateSittingProformaSerializer(data=latesitting_data)
         if latesitting_serializer.is_valid():
             latesitting=latesitting_serializer.save()
             caad_latesitting_verification_data = {
@@ -436,121 +476,190 @@ def LateSittingApi(request,id=0):
             )
             if caad_latesitting_verification_serializer.is_valid():
                 caad_latesitting_verification_serializer.save()
-            return JsonResponse("Added a Late Sitting Form Successfully",safe=False)
-        return JsonResponse("Failed to add Late Sitting Form",safe=False)
-    elif request.method=='PUT':
-        latesitting_data=JSONParser().parse(request)
-        latesitting=LateSittingProforma.objects.get(late_form_id=latesitting_data['latesit_id'])
-        latesitting_serializer=LateSittingProformaSerializer(latesitting,data=latesitting_data)
+            return Response(latesitting_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(latesitting_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            latesitting = LateSittingProforma.objects.get(pk=pk)
+        except LateSittingProforma.DoesNotExist:
+            return Response(
+                {"res": "Late Sitting Proforma not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        latesitting_serializer = LateSittingProformaSerializer(latesitting, data=request.data)
         if latesitting_serializer.is_valid():
             latesitting_serializer.save()
-            return JsonResponse("Updated the late sitting form successfuly",safe=False)
-        return JsonResponse("Failed to update the late sitting form")
-    elif request.method=='DELETE':
-        latesitting=LateSittingProforma.objects.get(latesit_id=id)
+            return Response(latesitting_serializer.data, status=status.HTTP_200_OK)
+        return Response(latesitting_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            latesitting = LateSittingProforma.objects.get(pk=pk)
+        except LateSittingProforma.DoesNotExist:
+            return Response(
+                {"res": "Late Sitting Proforma not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
         latesitting.delete()
-        return JsonResponse("Deleted the late form Successfully, yay",safe=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-@csrf_exempt
-def CaadLatesittingVerificationApi(request,caad_latesitting_id=0):
-    if request.method=="GET":
-        CaadLatesittingVerifications_data = CaadLatesittingVerification.objects.all()
-        CaadLatesittingVerifications_serializer =CaadLatesittingVerificationSerializer(CaadLatesittingVerifications_data, many=True)
-        return JsonResponse(CaadLatesittingVerifications_serializer.data,safe=False)
-    elif request.method == 'POST':
-        CaadLatesittingVerifications_data=JSONParser().parse(request)
-        CaadLatesittingVerifications_serializer = CaadLatesittingVerificationSerializer(data=CaadLatesittingVerifications_data) 
-        if CaadLatesittingVerifications_serializer.is_valid():
-            CaadLatesittingVerifications_serializer.save()
-            return JsonResponse({"message": "Added successfully"})
-        return JsonResponse("no added sucessfully",safe=False)
-    elif request.method == 'PUT':
-        CaadLatesittingVerifications_data=JSONParser().parse(request)
-        CaadLatesittingVerificationsdata=CaadLatesittingVerification.objects.get(caad_latesitting_id=CaadLatesittingVerifications_data['caad_latesitting_id'])
-        CaadLatesittingVerifications_serializer = CaadLatesittingVerificationSerializer(CaadLatesittingVerificationsdata,data=CaadLatesittingVerifications_data) 
-        if CaadLatesittingVerifications_serializer.is_valid():
-            CaadLatesittingVerifications_serializer.save()
-            return JsonResponse({"message": "Updated successfully"})
-        return JsonResponse("no added sucessfully",safe=False)
-    elif request.method == 'DELETE':
-        CaadLatesittingVerifications_data=CaadLatesittingVerification.objects.get(caad_latesitting_id=caad_latesitting_id)
-        CaadLatesittingVerifications_data.delete()
-        return JsonResponse("Deleted sucessfully",safe=False)
 
-@csrf_exempt
-def TransportMemFormApi(request,id=0):
-    if request.method=='GET':
+class CaadLatesittingVerificationApi(APIView):
+    def get(self, request, *args, **kwargs):
+        caadlatesit=CaadLatesittingVerification.objects.all()
+        if not caadlatesit:
+            return Response(
+                {"res": "Caad Late Sitting Verification not found"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        caadlatesit_serializer=CaadLatesittingVerificationSerializer(caadlatesit,many=True)
+        return Response(caadlatesit_serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        caadlatesit_data = request.data
+        caadlatesit_serializer = CaadLatesittingVerificationSerializer(data=caadlatesit_data)
+        if caadlatesit_serializer.is_valid():
+            caadlatesit_serializer.save()
+            return Response(caadlatesit_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(caadlatesit_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            caadlatesit = CaadLatesittingVerification.objects.get(pk=pk)
+        except CaadLatesittingVerification.DoesNotExist:
+            return Response(
+                {"res": "CAAD Late Sitting Verification not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        caadlatesit_serializer = CaadLatesittingVerificationSerializer(caadlatesit, data=request.data)
+        if caadlatesit_serializer.is_valid():
+            caadlatesit_serializer.save()
+            return Response(caadlatesit_serializer.data, status=status.HTTP_200_OK)
+        return Response(caadlatesit_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            caadlatesit = CaadLatesittingVerification.objects.get(pk=pk)
+        except CaadLatesittingVerification.DoesNotExist:
+            return Response(
+                {"res": "CAAD Late Sitting Verification not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        caadlatesit.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class TransportMemFormApi(APIView):
+    def get(self, request, *args, **kwargs):
         transportform=TransportMemberProforma.objects.all()
+        if not transportform:
+            return Response(
+                {"res": "Transport Member Proforma not found"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         transportform_serializer=TransportMemberProformaSerializer(transportform,many=True)
-        return JsonResponse(transportform_serializer.data,safe=False)
-    elif request.method=='POST':
-        transportform_data=JSONParser().parse(request)
+        return Response(transportform_serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        transportform_data = request.data
         try:
             std_cnic = transportform_data['std_cnic']
         except KeyError:
-            return JsonResponse({"message": "Missing 'std_cnic' field in the request data"}, status=400)
-        internship_id=services.get_internship(std_cnic)
-        identity_id=services.get_identity(internship_id)
-        transportform_data['internship'] = internship_id
-        transportform_data['identity_card'] = identity_id
-        transportform_serializer=TransportMemberProformaSerializer(data=transportform_data)
+            return Response({"message": "Missing std_cnic"}, status=400)
+        internship=services.get_internship(std_cnic)
+        identity=services.get_identity(internship)
+        transportform_data['internship']=internship
+        transportform_data['identity_card']=identity
+        transportform_serializer = TransportMemberProformaSerializer(data=transportform_data)
         if transportform_serializer.is_valid():
             transport=transportform_serializer.save()
-            caad_transport_verification_data = {
+            print(transport)
+            caadtransportsect_verification_data = {
                 'transport_form': transport.transport_form_id,
             }
-            caad_transport_verification_serializer = CaadTransportVerificationSerializer(
-                data=caad_transport_verification_data
+            caadtransportsectverification_serializer = CaadTransportVerificationSerializer(
+                data=caadtransportsect_verification_data
             )
-            if caad_transport_verification_serializer.is_valid():
-                caad_transport_verification_serializer.save()
+            if caadtransportsectverification_serializer.is_valid():
+                caadtransportsectverification_serializer.save()
+            return Response(transportform_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(transportform_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            return JsonResponse("Added a Transport Membership Form Successfully",safe=False)
-        return JsonResponse("Failed to add Transport Membership Form",safe=False)
-    elif request.method=='PUT':
-        transportform_data=JSONParser().parse(request)
-        transportform=TransportMemberProforma.objects.get(transport_form_id=transportform_data['transport_form_id'])
-        transportform_serializer=TransportMemberProformaSerializer(transportform,data=transportform_data)
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            transportform = TransportMemberProforma.objects.get(pk=pk)
+        except TransportMemberProforma.DoesNotExist:
+            return Response(
+                {"res": "Transport Member Proforma not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        transportform_serializer = TransportMemberProformaSerializer(transportform, data=request.data)
         if transportform_serializer.is_valid():
             transportform_serializer.save()
-            return JsonResponse("Updated the Transport Membership form successfuly",safe=False)
-        return JsonResponse("Failed to update the Transport Membership form")
-    elif request.method=='DELETE':
-        transportform=TransportMemberProforma.objects.get(transport_form_id=id)
+            return Response(transportform_serializer.data, status=status.HTTP_200_OK)
+        return Response(transportform_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            transportform = TransportMemberProforma.objects.get(pk=pk)
+        except TransportMemberProforma.DoesNotExist:
+            return Response(
+                {"res": "Transport Member Proforma not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
         transportform.delete()
-        return JsonResponse("Deleted the Transport Form Successfully, yay",safe=False)
-
-
-@csrf_exempt
-def CaadTransportVerificationApi(request,id=0):
-    if request.method=='GET':
-        transportsect=CaadTransportVerification.objects.all()
-        transportsect_serializer=CaadTransportVerificationSerializer(transportsect,many=True)
-        return JsonResponse(transportsect_serializer.data,safe=False)
-    elif request.method=='POST':
-        transportsect_data=JSONParser().parse(request)
-        transportsect_serializer=CaadTransportVerificationSerializer(data=transportsect_data)
-        if transportsect_serializer.is_valid():
-            transportsect_serializer.save()
-            return JsonResponse("Added a Transport Section Confirmation Successfully",safe=False)
-        return JsonResponse("Failed to add Transport Confirmation",safe=False)
-    elif request.method=='PUT':
-        transportsect_data=JSONParser().parse(request)
-        transportsect=CaadTransportVerification.objects.get(transport_confirmation_id=transportsect_data['transport_confirmation_id'])
-        transportsect_serializer=CaadTransportVerificationSerializer(transportsect,data=transportsect_data)
-        if transportsect_serializer.is_valid():
-            transportsect_serializer.save()
-            return JsonResponse("Updated the Transport Section Confirmation successfuly",safe=False)
-        return JsonResponse("Failed to update the Transport Section Confirmation")
-    elif request.method=='DELETE':
-        transportsect=CaadTransportVerification.objects.get(transport_confirmation_id=id)
-        transportsect.delete()
-        return JsonResponse("Deleted the Transport Section Confirmation Successfully, yay",safe=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 
-# Accomodation Proforma API
-@api_view(['GET', 'POST','PUT','DELETE'])
+class CaadTransportVerificationApi(APIView):
+    def get(self, request, *args, **kwargs):
+        caadtransportsect=CaadTransportVerification.objects.all()
+        if not caadtransportsect:
+            return Response(
+                {"res": "Caad Transport Verification not found"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        caadtransportsect_serializer=CaadTransportVerificationSerializer(caadtransportsect,many=True)
+        return Response(caadtransportsect_serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        caadtransportsect_data = request.data
+        caadtransportsect_serializer = CaadTransportVerificationSerializer(data=caadtransportsect_data)
+        if caadtransportsect_serializer.is_valid():
+            caadtransportsect_serializer.save()
+            return Response(caadtransportsect_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(caadtransportsect_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            caadtransportsect = CaadTransportVerification.objects.get(pk=pk)
+        except CaadTransportVerification.DoesNotExist:
+            return Response(
+                {"res": "CAAD Transport Verification not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        caadtransportsect_serializer = CaadTransportVerificationSerializer(caadtransportsect, data=request.data)
+        if caadtransportsect_serializer.is_valid():
+            caadtransportsect_serializer.save()
+            return Response(caadtransportsect_serializer.data, status=status.HTTP_200_OK)
+        return Response(caadtransportsect_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            caadtransportsect = CaadTransportVerification.objects.get(pk=pk)
+        except CaadTransportVerification.DoesNotExist:
+            return Response(
+                {"res": "CAAD Transport Section Verification not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        caadtransportsect.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+
 def AccomodationProformaApi(request,id=0):
     if request.method=="GET":
         accomodation_prof = AccomodationProforma.objects.all()
@@ -596,8 +705,7 @@ def AccomodationProformaApi(request,id=0):
 # End here Accomodation Proforma API
   
 
-# Accomodation Type API
-@api_view(['GET', 'POST','PUT','DELETE'])
+
 def AccomodationTypeApi(request,id=0):
     if request.method=="GET":
         accomodation_type = AccomodationType.objects.all()
@@ -625,8 +733,7 @@ def AccomodationTypeApi(request,id=0):
 #End
 
 
-# Caad Accomodation Verification
-@api_view(['GET', 'POST','PUT','DELETE'])
+
 def CaadAccomodationApi(request,id=0):
     if request.method=="GET":
         ncpChk_accomodation = CaadAccomodationVerification.objects.all()
@@ -654,7 +761,7 @@ def CaadAccomodationApi(request,id=0):
 #End
 
 #NCP check accomodation
-@api_view(['GET', 'POST','PUT','DELETE'])
+
 def NcpCheckAccApi(request,id=0):
     if request.method=="GET":
         caad_accomodation = NcpAccomodationCheck.objects.all()
@@ -682,7 +789,6 @@ def NcpCheckAccApi(request,id=0):
 #END
 
 #NCP approval accomodation
-@api_view(['GET', 'POST','PUT','DELETE'])
 def NcpApprovalAccApi(request,id=0):
     if request.method=="GET":
         ncpAppr_accomodation = NcpAccomodationApproval.objects.all()
@@ -708,8 +814,6 @@ def NcpApprovalAccApi(request,id=0):
         ncpAppr_accomodation.delete()
         return JsonResponse("Deleted sucessfully",safe=False)
 #END
-#Extension Proforma
-@api_view(['GET', 'POST','PUT','DELETE'])
 def ExtensionProformaApi(request,id=0):
     if request.method=="GET":
         extension_prof = ExtensionProforma.objects.all()
@@ -750,8 +854,6 @@ def ExtensionProformaApi(request,id=0):
         return JsonResponse("Deleted sucessfully",safe=False)
 #END
 
-#CAAD Extension Proforma Verification
-@api_view(['GET', 'POST','PUT','DELETE'])
 def CaadExtensionVerificationApi(request,id=0):
     if request.method=="GET":
         caad_extension_prof = CaadExtensionVerification.objects.all()
@@ -778,8 +880,6 @@ def CaadExtensionVerificationApi(request,id=0):
         return JsonResponse("Deleted sucessfully",safe=False)
 #END
 
-#Login Proforma
-@api_view(['GET', 'POST','PUT','DELETE'])
 def LoginProformaApi(request,id=0):
     if request.method=="GET":
         login_prof = LoginProforma.objects.all()
@@ -820,8 +920,6 @@ def LoginProformaApi(request,id=0):
         return JsonResponse("Deleted sucessfully",safe=False)
 #END
 
-#Login Proforma
-@api_view(['GET', 'POST','PUT','DELETE'])
 def ItDeptLoginApi(request,id=0):
     if request.method=="GET":
         it_login = ItDeptLogin.objects.all()
