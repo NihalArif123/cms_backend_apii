@@ -11,6 +11,6 @@ install:
 run-gunicorn:
 	python3 manage.py makemigrations
 	python3 manage.py migrate
-	gunicorn hgtddb.wsgi:application --bind 0.0.0.0:8000 --access-logfile /home/hgtd/access.log --error-logfile /home/hgtd/error.log
+	gunicorn cms_backend_api.wsgi:application --bind 0.0.0.0:8000 --access-logfile /home/caad/access.log --error-logfile /home/caad/error.log
 
 

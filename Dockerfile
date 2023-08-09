@@ -5,25 +5,23 @@ FROM python:3.10-slim
 RUN apt-get clean all && apt-get update && apt-get upgrade -y && apt-get install make libaio1 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create a new user and group
-RUN groupadd -r hgtd && useradd -r -g hgtd hgtd
+RUN groupadd -r caad && useradd -r -g caad caad
 
-WORKDIR /home/hgtd
+WORKDIR /home/caad
 # Copy the requirements file to the working directory
 
 COPY . .
-
-RUN dpkg -i oracle-instantclient19.19-basic_19.19.0.0.0-2_amd64.deb && apt-get install -f
 
 # Update pip without caching anything
 RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt 
 
 # Set ownership of the working directory to the new user
-RUN chown -R hgtd:hgtd /home/hgtd
+RUN chown -R hgtd:hgtd /home/caad
 
 # Switch to the new user
-USER hgtd
+USER caad
 
-# Set environment variables (modify as needed)
+# Set environment variables (modify as needed)a
 #ENV DJANGO_SETTINGS_MODULE=icms_teams.settings
 #ENV PYTHONUNBUFFERED=1
 
