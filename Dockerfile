@@ -5,13 +5,15 @@ FROM python:3.10-slim
 RUN apt-get clean all && apt-get update && apt-get upgrade -y && apt-get install make libaio1 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install required packages
-RUN apt-get update && apt-get install -y unixodbc unixodbc-dev freetds-dev
+RUN apt-get update && apt-get install -y unixodbc unixodbc-dev freetds-dev odbcinst
 
 # Configure ODBC driver
 RUN echo "[ODBC Driver 17 for SQL Server]" >> /etc/odbcinst.ini && \
     echo "Description=Microsoft ODBC Driver 17 for SQL Server" >> /etc/odbcinst.ini && \
-    echo "Driver=ODBC Driver 17 for SQL Server" >> /etc/odbcinst.ini && \
+    echo "Driver=/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so" >> /etc/odbcinst.ini && \
     echo "UsageCount=1" >> /etc/odbcinst.ini
+RUN odbcinst -j 
+RUN cat /etc/odbcinst.ini
 
 # Create a new user and group
 RUN groupadd -r caad && useradd -r -g caad caad
@@ -40,8 +42,9 @@ EXPOSE 8000/tcp
 
 # Run the Django development server when the container starts
 
+
 # Set the entrypoint to execute "make" with arguments
-#ENTRYPOINT ["make"]
+ENTRYPOINT ["make"]
 
 # Set the default command to "run"
-CMD ["python", "manage.py", "runserver", "127.0.0.1:8000"]
+CMD ["run-gunicorn"]
