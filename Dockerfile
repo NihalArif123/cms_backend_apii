@@ -4,6 +4,15 @@ FROM python:3.10-slim
 # Update and upgrade libraries, and remove apt cache
 RUN apt-get clean all && apt-get update && apt-get upgrade -y && apt-get install make libaio1 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Install required packages
+RUN apt-get update && apt-get install -y unixodbc unixodbc-dev freetds-dev
+
+# Configure ODBC driver
+RUN echo "[ODBC Driver 17 for SQL Server]" >> /etc/odbcinst.ini && \
+    echo "Description=Microsoft ODBC Driver 17 for SQL Server" >> /etc/odbcinst.ini && \
+    echo "Driver=ODBC Driver 17 for SQL Server" >> /etc/odbcinst.ini && \
+    echo "UsageCount=1" >> /etc/odbcinst.ini
+
 # Create a new user and group
 RUN groupadd -r caad && useradd -r -g caad caad
 
@@ -16,7 +25,8 @@ COPY . .
 RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt 
 
 # Set ownership of the working directory to the new user
-RUN chown -R hgtd:hgtd /home/caad
+RUN chown -R caad:caad /home/caad
+
 
 # Switch to the new user
 USER caad
@@ -31,7 +41,7 @@ EXPOSE 8000/tcp
 # Run the Django development server when the container starts
 
 # Set the entrypoint to execute "make" with arguments
-ENTRYPOINT ["make"]
+#ENTRYPOINT ["make"]
 
 # Set the default command to "run"
-CMD ["run-gunicorn"]
+CMD ["python", "manage.py", "runserver", "127.0.0.1:8000"]
