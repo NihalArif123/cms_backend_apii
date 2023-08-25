@@ -9,24 +9,24 @@ from caad_api import services
 
 
 class studentApi(APIView):
-    def get(self, request, *args, **kwargs):
-        students = Student.objects.all()
-        if not students:
-            return Response(
-                {"res": "Students not found"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        students_serializer = StudentSerializer(students,many=True)
-        return Response(students_serializer.data,status=status.HTTP_200_OK)
-    # def get(self, request, cnic,*args, **kwargs):
-    #     students= Student.objects.get(std_cnic=cnic)
+    # def get(self, request, *args, **kwargs):
+    #     students = Student.objects.all()
     #     if not students:
     #         return Response(
     #             {"res": "Students not found"},
     #             status=status.HTTP_400_BAD_REQUEST
     #         )
-    #     students_serializer = StudentSerializer(students)
+    #     students_serializer = StudentSerializer(students,many=True)
     #     return Response(students_serializer.data,status=status.HTTP_200_OK)
+    def get(self, request, cnic,*args, **kwargs):
+        students= Student.objects.get(std_cnic=cnic)
+        if not students:
+            return Response(
+                {"res": "Students not found"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        students_serializer = StudentSerializer(students)
+        return Response(students_serializer.data,status=status.HTTP_200_OK)
     def post(self, request, *args, **kwargs):
         serializer = StudentSerializer(data=request.data)
         if serializer.is_valid():
@@ -827,7 +827,7 @@ class AccomodationProformaApi(APIView):
     def delete(self, request, pk):
         accomodation_prof = AccomodationProforma.objects.get(pk=pk)
         accomodation_prof.delete()
-        return Response("Deleted sucessfully", safe=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # End here Accomodation Proforma API
   
@@ -859,7 +859,7 @@ class AccomodationTypeApi(APIView):
     def delete(self, request, pk):
         accomodation_type = AccomodationType.objects.get(pk=pk)
         accomodation_type.delete()
-        return Response("Deleted sucessfully", safe=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # Caad Accomodation Verification
@@ -889,7 +889,7 @@ class CaadAccomodationApi(APIView):
     def delete(self, request, pk):
         caad_accomodation = CaadAccomodationVerification.objects.get(pk=pk)
         caad_accomodation.delete()
-        return Response("Deleted sucessfully", safe=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 #END
 
 #NCP check accomodation
@@ -920,7 +920,7 @@ class NcpCheckAccApi(APIView):
     def delete(self, request, pk):
         ncp_accomodation = NcpAccomodationCheck.objects.get(pk=pk)
         ncp_accomodation.delete()
-        return Response("Deleted sucessfully", safe=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 #NCP approval accomodation
 class NcpApprovalAccApi(APIView):
@@ -951,7 +951,7 @@ class NcpApprovalAccApi(APIView):
     def delete(self, request, pk):
         ncp_approval_accomodation = NcpAccomodationApproval.objects.get(pk=pk)
         ncp_approval_accomodation.delete()
-        return Response("Deleted sucessfully", safe=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 #Extension Proforma
 
 
