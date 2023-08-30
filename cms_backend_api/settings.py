@@ -133,4 +133,11 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# settings.py
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587  # or the appropriate port for your email provider
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False  # Set to True if your provider uses SSL
+EMAIL_HOST_USER = 'caadportal@gmail.com'
+EMAIL_HOST_PASSWORD = 'yjsfjonsleldjqsz'

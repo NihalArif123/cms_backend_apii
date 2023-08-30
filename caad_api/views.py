@@ -8,27 +8,51 @@ from rest_framework import permissions
 from .models import *
 from .serializers import *
 from caad_api import services
+from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 
+class send_verification_email(APIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            email = request.data.get('email')  # Get the email from request data
+            if not email:
+                return Response({"res": "Email not provided"}, status=400)  
+            verification_code = services.generate_verification_code()  # Implement this function
+ 
+            message = f'Your verification code is: {verification_code}'
+            send_mail('Verification Code', message, 'caadportal@gmail.com', [email])
+            return Response({"res":"Email Sent Successfully"},status=200)
+        except Exception as e:
+            return Response({"res": "An error occurred while sending the verification code"},status=500)
+class verify_code(APIView):
+    def post(self, request, *args, **kwargs):
+        code_to_verify = request.data.get('code')
+        if verification_code == code_to_verify:
+            print("v:", verification_code)
+            return Response({"res":"Signup Successfully"},status=200)
+        else:
+            return Response({"res":"Signup UnSuccessfully"},status=500)
 class studentApi(APIView):
-    def get(self, request, *args, **kwargs):
-        students = Student.objects.all()
-        if not students:
-            return Response(
-                {"res": "Students not found"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        students_serializer = StudentSerializer(students,many=True)
-        return Response(students_serializer.data,status=status.HTTP_200_OK)
-    # def get(self, request, cnic,*args, **kwargs):
-    #     students= Student.objects.get(std_cnic=cnic)
+    # def get(self, request, *args, **kwargs):
+    #     students = Student.objects.all()
     #     if not students:
     #         return Response(
     #             {"res": "Students not found"},
     #             status=status.HTTP_400_BAD_REQUEST
     #         )
-    #     students_serializer = StudentSerializer(students)
+    #     students_serializer = StudentSerializer(students,many=True)
     #     return Response(students_serializer.data,status=status.HTTP_200_OK)
+    def get(self, request, cnic,*args, **kwargs):
+        students= Student.objects.get(std_cnic=cnic)
+        if not students:
+            return Response(
+                {"res": "Students not found"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        students_serializer = StudentSerializer(students)
+        return Response(students_serializer.data,status=status.HTTP_200_OK)
     def post(self, request, *args, **kwargs):
         serializer = StudentSerializer(data=request.data)
         if serializer.is_valid():
