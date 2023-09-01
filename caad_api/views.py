@@ -84,23 +84,12 @@ class studentApi(APIView):
             {"res": "Object deleted!"},
             status=status.HTTP_200_OK
         )
+
 class studentRegistrationApi(APIView):
-    def get(self, request, id,*args, **kwargs):
-        try:
-            student = Student.objects.get(std_cnic=id)
-            registration = StudentRegistration.objects.get(std_cnic=student)
-            registration_serializer = StudentRegistrationSerializer(registration)
-            return Response(registration_serializer.data,status=status.HTTP_200_OK)
-        except Student.DoesNotExist:
-            return Response(
-                {"res": "Student not found"},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except StudentRegistration.DoesNotExist:
-            return Response(
-                {"res": "Student registration not found"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+    def get(self, request, *args, **kwargs):
+        studentsReg = StudentRegistration.objects.all()
+        studentsReg_serializer = StudentRegistrationSerializer(studentsReg, many=True)
+        return Response(studentsReg_serializer.data)
 
     def post(self, request, *args, **kwargs):
         serializer = StudentRegistrationSerializer(data=request.data)
@@ -109,6 +98,7 @@ class studentRegistrationApi(APIView):
             return Response("Insert Successfully", status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def put(self, request,cnic, *args, **kwargs):
         studentReg_data = StudentRegistration.objects.get(std_cnic=cnic)
         if not studentReg_data:
@@ -175,29 +165,6 @@ class InternshipsApi(APIView):
         Internships_data = Internships.objects.all()
         Internships_serializer = InternshipsSerializer(Internships_data, many=True)
         return Response(Internships_serializer.data)
-    # def get(self, request, id,*args, **kwargs):
-    #     try:
-    #         student = Student.objects.get(std_cnic=id)
-    #         registration = StudentRegistration.objects.get(std_cnic=student)
-    #         internship= Internships.objects.get(registration_no=registration)
-    #         internship_serializer = InternshipsSerializer(internship)
-    #         return Response(internship_serializer.data,status=status.HTTP_200_OK)
-    #     except Student.DoesNotExist:
-    #         return Response(
-    #             {"res": "Student not found"},
-    #             status=status.HTTP_404_NOT_FOUND
-    #         )
-    #     except StudentRegistration.DoesNotExist:
-    #         return Response(
-    #             {"res": "Student registration not found"},
-    #             status=status.HTTP_404_NOT_FOUND
-    #         )
-    #     except Internships.DoesNotExist:
-    #         return Response(
-    #             {"res": "Internship not found"},
-    #             status=status.HTTP_404_NOT_FOUND
-    #         )
-
     def post(self, request, *args, **kwargs):
         Internships_data=request.data
         try:
