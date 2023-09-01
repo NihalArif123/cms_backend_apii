@@ -8,6 +8,7 @@ from .serializers import *
 from caad_api import services
 
 
+
 class studentApi(APIView):
     # def get(self, request, *args, **kwargs):
     #     students = Student.objects.all()
@@ -61,10 +62,23 @@ class studentApi(APIView):
             status=status.HTTP_200_OK
         )
 class studentRegistrationApi(APIView):
-    def get(self, request, *args, **kwargs):
-        studentsReg = StudentRegistration.objects.all()
-        studentsReg_serializer = StudentRegistrationSerializer(studentsReg, many=True)
-        return Response(studentsReg_serializer.data)
+    def get(self, request, id,*args, **kwargs):
+        try:
+            student = Student.objects.get(std_cnic=id)
+            registration = StudentRegistration.objects.get(std_cnic=student)
+            registration_serializer = StudentRegistrationSerializer(registration)
+            return Response(registration_serializer.data,status=status.HTTP_200_OK)
+        except Student.DoesNotExist:
+            return Response(
+                {"res": "Student not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except StudentRegistration.DoesNotExist:
+            return Response(
+                {"res": "Student registration not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
     def post(self, request, *args, **kwargs):
         serializer = StudentRegistrationSerializer(data=request.data)
         if serializer.is_valid():
@@ -138,6 +152,29 @@ class InternshipsApi(APIView):
         Internships_data = Internships.objects.all()
         Internships_serializer = InternshipsSerializer(Internships_data, many=True)
         return Response(Internships_serializer.data)
+    # def get(self, request, id,*args, **kwargs):
+    #     try:
+    #         student = Student.objects.get(std_cnic=id)
+    #         registration = StudentRegistration.objects.get(std_cnic=student)
+    #         internship= Internships.objects.get(registration_no=registration)
+    #         internship_serializer = InternshipsSerializer(internship)
+    #         return Response(internship_serializer.data,status=status.HTTP_200_OK)
+    #     except Student.DoesNotExist:
+    #         return Response(
+    #             {"res": "Student not found"},
+    #             status=status.HTTP_404_NOT_FOUND
+    #         )
+    #     except StudentRegistration.DoesNotExist:
+    #         return Response(
+    #             {"res": "Student registration not found"},
+    #             status=status.HTTP_404_NOT_FOUND
+    #         )
+    #     except Internships.DoesNotExist:
+    #         return Response(
+    #             {"res": "Internship not found"},
+    #             status=status.HTTP_404_NOT_FOUND
+    #         )
+
     def post(self, request, *args, **kwargs):
         Internships_data=request.data
         try:
@@ -465,15 +502,33 @@ class CaadClearanceVerificationApi(APIView):
         )
     
 class IdentitycardApi(APIView):
-    def get(self, request, *args, **kwargs):
-        identity = IdentitycardProforma.objects.all()
-        if not identity:
-            return Response(
-                {"res": "Identity Card not found"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        identity_serializer = IdentitycardProformaSerializer(identity, many=True)
-        return Response(identity_serializer.data, status=status.HTTP_200_OK)
+    def get(self, request,id,*args, **kwargs):
+        try:
+            identitycard = IdentitycardProforma.objects.select_related(
+            'internship__registration_no__std_cnic'
+             ).get(internship__registration_no__std_cnic=id)
+        
+            data = {
+                'identity_id': identitycard.identity_id,
+                'identity_apply_date': identitycard.identity_apply_date,
+                'ncp_assigned_regno': identitycard.internship.ncp_assigned_regno,
+                'designation': identitycard.internship.registration_no.designation,
+                'registration_date': identitycard.registration_date,
+                'registration_receipt_number': identitycard.registration_receipt_number,
+                'blood_group': identitycard.blood_group,
+                'identification_mark': identitycard.identification_mark,
+                'application_status': identitycard.application_status,
+                'std_cnic':identitycard.internship.registration_no.std_cnic.std_cnic,
+                'std_name': identitycard.internship.registration_no.std_cnic.std_name,
+                
+
+            # Other fields...
+        }
+
+            return Response(data)
+        except IdentitycardProforma.DoesNotExist:
+            return Response({'error': 'Identity card not found'}, status=404)
+
     def post(self, request, *args, **kwargs):
         identity_data = request.data
         try:
@@ -673,15 +728,34 @@ class CaadLatesittingVerificationApi(APIView):
 
 
 class TransportMemFormApi(APIView):
-    def get(self, request, *args, **kwargs):
-        transportform=TransportMemberProforma.objects.all()
-        if not transportform:
-            return Response(
-                {"res": "Transport Member Proforma not found"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        transportform_serializer=TransportMemberProformaSerializer(transportform,many=True)
-        return Response(transportform_serializer.data, status=status.HTTP_200_OK)
+    def get(self, request,id,*args, **kwargs):
+        try:
+            transport = TransportMemberProforma.objects.select_related(
+            'internship__registration_no__std_cnic'
+             ).get(internship__registration_no__std_cnic=id)
+            identitycard = transport.identity_card.identity_id
+            data = {
+                'identitycard': identitycard,
+                'transport_application_date': transport.transport_application_date,
+                'transport_req_start_date': transport.transport_req_start_date,
+                'transport_req_end_date' : transport.transport_req_end_date,
+                'pick_drop_point': transport.pick_drop_point,
+                'lab_contact_no':transport.lab_contact_no,
+                'application_status': transport.application_status,
+                'std_name': transport.internship.registration_no.std_cnic.std_name,
+                'std_phone_no': transport.internship.registration_no.std_cnic.std_phone_no,
+                'proposed_research_area': transport.internship.proposed_research_area,
+                'ncp_assigned_regno': transport.internship.ncp_assigned_regno,
+                'proposed_research_end_time':transport.internship.proposed_research_end_time,
+                
+
+            # Other fields...
+        }
+
+            return Response(data)
+        except IdentitycardProforma.DoesNotExist:
+            return Response({'error': 'Identity card not found'}, status=404)
+
 
     def post(self, request, *args, **kwargs):
         transportform_data = request.data

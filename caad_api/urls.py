@@ -25,17 +25,17 @@ urlpatterns = [
     
   
     path('identity', IdentitycardApi.as_view(), name='IdentitycardApi'),  
-    path('identity/<int:pk>', IdentitycardApi.as_view(), name='IdentitycardApi'),
+    path('identity/<int:id>', IdentitycardApi.as_view(), name='IdentitycardApi'),
     path('caadidentity',CaadIdentityApi.as_view(), name='CaadIdentityApi'),  
-    path('caadidentity/<int:pk>', CaadIdentityApi.as_view(), name='CaadIdentityApi'),  
+    path('caadidentity/<int:id>', CaadIdentityApi.as_view(), name='CaadIdentityApi'),  
     path('latesitting', LateSittingApi.as_view(), name='LateSittingApi'),  
-    path('latesitting/<int:pk>', LateSittingApi.as_view(), name='LateSittingApi'), 
+    path('latesitting/<int:id>', LateSittingApi.as_view(), name='LateSittingApi'), 
     path('caadlatesitting',CaadLatesittingVerificationApi.as_view(), name='CaadLatesittingVerificationApi'),  
-    path('caadlatesitting/<int:pk>', CaadLatesittingVerificationApi.as_view(), name='CaadLatesittingVerificationApi'), 
+    path('caadlatesitting/<int:id>', CaadLatesittingVerificationApi.as_view(), name='CaadLatesittingVerificationApi'), 
     path('transport', TransportMemFormApi.as_view(), name='TransportMemFormApi'),  
-    path('transport/<int:pk>',TransportMemFormApi.as_view(), name='TransportMemFormApi'),
+    path('transport/<int:id>',TransportMemFormApi.as_view(), name='TransportMemFormApi'),
     path('transportsect', CaadTransportVerificationApi.as_view(), name='CaadTransportVerificationApi'),  
-    path('transportsect/<int:pk>', CaadTransportVerificationApi.as_view(), name='CaadTransportVerificationApi'), 
+    path('transportsect/<int:id>', CaadTransportVerificationApi.as_view(), name='CaadTransportVerificationApi'), 
 
     path('accomodation', AccomodationProformaApi.as_view(), name="AccomodationProformaApi"),
     path('accomodation/<int:pk>', AccomodationProformaApi.as_view()),
