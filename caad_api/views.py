@@ -34,7 +34,7 @@ class send_verification_email(APIView):
                     student.save()
             except ObjectDoesNotExist:
                 verification_code = services.generate_verification_code()
-                student = Student(std_email=email, std_cnic=cnic, std_name=std_name, verification_code=verification_code,verification_status="false",std_password=password)
+                student = Student(std_email=email, std_cnic=cnic, std_name=std_name, verification_code=verification_code,verification_status="false",password=password)
                 student.save()
             
             message = f'Your verification code is: {verification_code}'
