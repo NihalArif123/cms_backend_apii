@@ -13,28 +13,60 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.db.models import F
 
+from django.core.exceptions import ObjectDoesNotExist
 
 class send_verification_email(APIView):
     def post(self, request, *args, **kwargs):
         try:
-            email = request.data.get('email')  # Get the email from request data
-            if not email:
-                return Response({"res": "Email not provided"}, status=400)  
-            verification_code = services.generate_verification_code()  # Implement this function
- 
+            email = request.data.get('email')
+            cnic = request.data.get('cnic')
+            std_name = request.data.get('std_name')
+            password=request.data.get('password')
+            if not email or not cnic or not std_name:
+                return Response({"res": "Required data not provided"}, status=400)
+            try:
+                student = Student.objects.get(std_cnic=cnic)
+                print("Student object found:", student)
+                if student.verification_status=="true":
+                    return Response({"Student Already Exists and Verified"}, status=400)
+                else:
+                    verification_code = services.generate_verification_code()
+                    student.email = email
+                    student.verification_code = verification_code
+                    student.save()
+            except ObjectDoesNotExist:
+                verification_code = services.generate_verification_code()
+                student = Student(std_email=email, std_cnic=cnic, std_name=std_name, verification_code=verification_code,verification_status="false",password=password)
+                student.save()
+            
             message = f'Your verification code is: {verification_code}'
             send_mail('Verification Code', message, 'caadportal@gmail.com', [email])
-            return Response({"res":"Email Sent Successfully"},status=200)
+            return Response({"res": "Email Sent Successfully"}, status=200)
         except Exception as e:
-            return Response({"res": "An error occurred while sending the verification code"},status=500)
+            return Response({"res": "An error occurred while sending the verification code"}, status=500)
 class verify_code(APIView):
     def post(self, request, *args, **kwargs):
-        code_to_verify = request.data.get('code')
-        if verification_code == code_to_verify:
-            print("v:", verification_code)
-            return Response({"res":"Signup Successfully"},status=200)
-        else:
-            return Response({"res":"Signup UnSuccessfully"},status=500)
+        try:
+            
+            code_to_verify = int(request.data.get('code'))
+            cnic=request.data.get('cnic')
+            try:
+                student = Student.objects.get(std_cnic=cnic)
+                print(student.verification_status)
+                print("chdc",student.verification_code==code_to_verify)
+                if student.verification_code==code_to_verify:
+                    student.verification_status="true"
+                    print(student.verification_status)
+                    student.save()
+                    print(student)
+                    return Response({"Sign Up Successfull"},status=200)
+                else:
+                    return Response({"res":"Code does not match.Try again"},status=400)
+
+            except ObjectDoesNotExist:
+                    return Response({"res":"student not"},status=400)
+        except Exception as e:
+             return Response({"res": "An error occurred while verifying the verification code"}, status=500)
 class studentApi(APIView):
     # def get(self, request, *args, **kwargs):
     #     students = Student.objects.all()
