@@ -145,7 +145,8 @@ class CaadIdentityVerification(models.Model):
     university_type = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     security_particular_proforma = models.BooleanField(blank=True, null=True)
     police_verification_proforma = models.BooleanField(blank=True, null=True)
-    identity = models.ForeignKey('IdentitycardProforma', models.DO_NOTHING, blank=True, null=False)
+    identity = models.ForeignKey('IdentitycardProforma', models.DO_NOTHING)
+
     class Meta:
         managed = False
         db_table = 'caad_identity_verification'
@@ -153,7 +154,7 @@ class CaadIdentityVerification(models.Model):
 
 class CaadLatesittingVerification(models.Model):
     caad_latesitting_id = models.AutoField(primary_key=True)
-    latesit = models.ForeignKey('LateSittingProforma', models.DO_NOTHING, blank=True, null=False)
+    latesit = models.ForeignKey('LateSittingProforma', models.DO_NOTHING)
 
     class Meta:
         managed = False
@@ -182,7 +183,7 @@ class CaadTransportVerification(models.Model):
     vehicle_type = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     confirmation_date = models.DateField(blank=True, null=True)
-    transport_form = models.ForeignKey('TransportMemberProforma', models.DO_NOTHING, blank=True, null=False)
+    transport_form = models.ForeignKey('TransportMemberProforma', models.DO_NOTHING)
 
     class Meta:
         managed = False
@@ -194,7 +195,7 @@ class ClearancePerforma(models.Model):
     internship = models.ForeignKey('Internships', models.DO_NOTHING, blank=True, null=True)
     reason_to_leave = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    identity = models.ForeignKey('IdentitycardProforma', models.DO_NOTHING, blank=True, null=False)
+    identity = models.ForeignKey('IdentitycardProforma', models.DO_NOTHING)
 
     class Meta:
         managed = False
@@ -270,7 +271,7 @@ class DocumentsUpload(models.Model):
 class EvaluationProforma(models.Model):
     evaluation_id = models.AutoField(primary_key=True)
     date_of_submission = models.DateField(blank=True, null=True)
-    internship = models.ForeignKey('Internships', models.DO_NOTHING, blank=True, null=False)
+    internship = models.ForeignKey('Internships', models.DO_NOTHING)
     research_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     research_title = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     research_summary = models.CharField(max_length=250, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
@@ -308,7 +309,7 @@ class HostedresearcherCategory(models.Model):
 class IdentitycardProforma(models.Model):
     identity_id = models.AutoField(primary_key=True)
     identity_apply_date = models.DateField(blank=True, null=True)
-    internship = models.ForeignKey('Internships', models.DO_NOTHING, blank=True, null=False)
+    internship = models.ForeignKey('Internships', models.DO_NOTHING)
     registration_date = models.DateField(blank=True, null=True)
     registration_receipt_number = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     blood_group = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
@@ -331,7 +332,7 @@ class Internships(models.Model):
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     ncp_employee_id = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     category = models.ForeignKey(HostedresearcherCategory, models.DO_NOTHING, blank=True, null=True)
-    registration_no = models.ForeignKey('StudentRegistration', models.DO_NOTHING, db_column='registration_no', blank=True, null=False)
+    registration_no = models.ForeignKey('StudentRegistration', models.DO_NOTHING, db_column='registration_no')
     ncp_assigned_regno = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
 
     class Meta:
@@ -341,7 +342,7 @@ class Internships(models.Model):
 
 class ItDeptLogin(models.Model):
     user_id = models.AutoField(primary_key=True)
-    login_form = models.ForeignKey('LoginProforma', models.DO_NOTHING, blank=True, null=False)
+    login_form = models.ForeignKey('LoginProforma', models.DO_NOTHING)
     email_acc = models.BooleanField(blank=True, null=True)
     window_login_acc = models.BooleanField(blank=True, null=True)
     all_user_mailing_list = models.BooleanField(blank=True, null=True)
@@ -359,7 +360,7 @@ class ItDeptLogin(models.Model):
 class LateSittingProforma(models.Model):
     latesit_id = models.AutoField(primary_key=True)
     late_performa_submitdate = models.DateField(blank=True, null=True)
-    internship = models.ForeignKey(Internships, models.DO_NOTHING, blank=True, null=False)
+    internship = models.ForeignKey(Internships, models.DO_NOTHING)
     latesitting_reason = models.CharField(max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     workarea_during_latework = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     lab_contact_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
@@ -378,7 +379,7 @@ class LateSittingProforma(models.Model):
 
 class LoginProforma(models.Model):
     login_form_id = models.AutoField(primary_key=True)
-    internship = models.ForeignKey(Internships, models.DO_NOTHING, blank=True, null=False)
+    internship = models.ForeignKey(Internships, models.DO_NOTHING)
     building = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     floor = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     room_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
@@ -399,7 +400,7 @@ class LoginProforma(models.Model):
 
 class NcpAccomodationApproval(models.Model):
     ncp_allotted_id = models.AutoField(primary_key=True)
-    ncp_chk = models.ForeignKey('NcpAccomodationCheck', models.DO_NOTHING, blank=True, null=False)
+    ncp_chk = models.ForeignKey('NcpAccomodationCheck', models.DO_NOTHING)
     room_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     allotment_startdate = models.DateField(blank=True, null=True)
     allotment_enddate = models.DateField(blank=True, null=True)
@@ -412,7 +413,7 @@ class NcpAccomodationApproval(models.Model):
 
 class NcpAccomodationCheck(models.Model):
     ncp_chk_id = models.AutoField(primary_key=True)
-    caad_hr3 = models.ForeignKey(CaadAccomodationVerification, models.DO_NOTHING, blank=True, null=False)
+    caad_hr3 = models.ForeignKey(CaadAccomodationVerification, models.DO_NOTHING)
     no_room_allotted_sop = models.IntegerField(blank=True, null=True)
     total_room_allotted = models.IntegerField(blank=True, null=True)
     space_available_room = models.IntegerField(blank=True, null=True)
@@ -438,7 +439,7 @@ class NcpDues(models.Model):
     estate_branch = models.BooleanField(blank=True, null=True)
     ncp_libaray = models.BooleanField(blank=True, null=True)
     a_ai_branch = models.BooleanField(db_column='A_AI_branch', blank=True, null=True)  # Field name made lowercase.
-    clearance = models.ForeignKey(ClearancePerforma, models.DO_NOTHING, blank=True, null=False)
+    clearance = models.ForeignKey(ClearancePerforma, models.DO_NOTHING)
 
     class Meta:
         managed = False
@@ -452,7 +453,7 @@ class NcpPublications(models.Model):
     no_papers_submitted = models.IntegerField(blank=True, null=True)
     no_papers_presented = models.IntegerField(blank=True, null=True)
     no_patents_submitted = models.IntegerField(blank=True, null=True)
-    evaluation = models.ForeignKey(EvaluationProforma, models.DO_NOTHING, blank=True, null=False)
+    evaluation = models.ForeignKey(EvaluationProforma, models.DO_NOTHING)
 
     class Meta:
         managed = False
@@ -463,7 +464,7 @@ class PublicationsList(models.Model):
     publications_id = models.AutoField(primary_key=True)
     publications_name = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     publications_document = models.BinaryField(blank=True, null=True)
-    std_cnic = models.ForeignKey('Student', models.DO_NOTHING, db_column='std_cnic', blank=True, null=False)
+    std_cnic = models.ForeignKey('Student', models.DO_NOTHING, db_column='std_cnic')
 
     class Meta:
         managed = False
@@ -477,7 +478,7 @@ class Student(models.Model):
     std_phone_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     std_password = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     verification_code = models.IntegerField(blank=True, null=True)
-    verification_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    verification_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True, default="false")
 
     class Meta:
         managed = False
@@ -486,7 +487,7 @@ class Student(models.Model):
 
 class StudentPictures(models.Model):
     std_pic_id = models.AutoField(primary_key=True)
-    std_cnic = models.ForeignKey(Student, models.DO_NOTHING, db_column='std_cnic', blank=True, null=False)
+    std_cnic = models.ForeignKey(Student, models.DO_NOTHING, db_column='std_cnic')
     image = models.BinaryField(blank=True, null=True)
 
     class Meta:
@@ -517,7 +518,7 @@ class StudentRegistration(models.Model):
 class TransportMemberProforma(models.Model):
     transport_form_id = models.AutoField(primary_key=True)
     transport_application_date = models.DateField(blank=True, null=True)
-    internship = models.ForeignKey(Internships, models.DO_NOTHING, blank=True, null=False)
+    internship = models.ForeignKey(Internships, models.DO_NOTHING)
     identity_card = models.ForeignKey(IdentitycardProforma, models.DO_NOTHING, blank=True, null=True)
     transport_req_start_date = models.DateField(blank=True, null=True)
     transport_req_end_date = models.DateField(blank=True, null=True)
