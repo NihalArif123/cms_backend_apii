@@ -1,4 +1,8 @@
 from .models import *
+import random
+
+def generate_verification_code():
+    return random.randint(1000, 9999)
 def get_internship(std_cnic):
         try:
             student_registration = StudentRegistration.objects.get(std_cnic=std_cnic)

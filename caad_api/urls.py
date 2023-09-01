@@ -22,8 +22,8 @@ urlpatterns = [
     path('dues/<int:id>', NcpDuesApi.as_view()),
     path('caadreg', CaadRegistrationVerificationApi.as_view()),
     path('caadreg/<int:id>', CaadRegistrationVerificationApi.as_view()),
-    
-  
+    path('send-verification-email', send_verification_email.as_view()),
+   path('verify-code', verify_code.as_view()),
     path('identity', IdentitycardApi.as_view(), name='IdentitycardApi'),  
     path('identity/<int:id>', IdentitycardApi.as_view(), name='IdentitycardApi'),
     path('caadidentity',CaadIdentityApi.as_view(), name='CaadIdentityApi'),  
