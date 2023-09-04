@@ -141,3 +141,4 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False  # Set to True if your provider uses SSL
 EMAIL_HOST_USER = 'caadportal@gmail.com'
 EMAIL_HOST_PASSWORD = 'yjsfjonsleldjqsz'
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"

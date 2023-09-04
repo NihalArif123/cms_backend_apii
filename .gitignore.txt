@@ -1,3 +1,0 @@
-/caad_api/__pycache__/
-/caad_api/migrations/__pycache__/
-/cms_backend_api/__pycache__/

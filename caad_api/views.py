@@ -13,6 +13,23 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ObjectDoesNotExist
 
+class login(APIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            cnic = request.data.get('cnic')
+            password = request.data.get('password')  # Get the password from the request
+            print(cnic)
+            try:
+                # Query the database to find a user with the provided CNIC and matching password
+                user = Student.objects.get(std_cnic=cnic, std_password=password)
+                # Return a success response since both CNIC and password match
+                return Response({"message": "Login successful","cnic": cnic}, status=200)
+
+            except Student.DoesNotExist:
+                # User with the provided CNIC and password doesn't exist, return an error response
+                return Response({'error': 'Invalid CNIC or password'}, status=400)
+        except Exception as e:
+                    return Response({"res": "An error occurred while sending the verification code"}, status=500)
 class send_verification_email(APIView):
     def post(self, request, *args, **kwargs):
         try:
@@ -34,7 +51,7 @@ class send_verification_email(APIView):
                     student.save()
             except ObjectDoesNotExist:
                 verification_code = services.generate_verification_code()
-                student = Student(std_email=email, std_cnic=cnic, std_name=std_name, verification_code=verification_code,verification_status="false",password=password)
+                student = Student(std_email=email, std_cnic=cnic, std_name=std_name, verification_code=verification_code,verification_status="false",std_password=password)
                 student.save()
             
             message = f'Your verification code is: {verification_code}'
@@ -80,17 +97,17 @@ class studentApi(APIView):
         if not students:
             return Response(
                 {"res": "Students not found"},
-                status=status.HTTP_400_BAD_REQUEST
+                status=400
             )
         students_serializer = StudentSerializer(students)
-        return Response(students_serializer.data,status=status.HTTP_200_OK)
+        return Response(students_serializer.data,status=200)
     def post(self, request, *args, **kwargs):
         serializer = StudentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response("Insert Successfully", status=status.HTTP_201_CREATED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=400)
 
     def put(self, request, cnic, *args, **kwargs):
         student_data = Student.objects.get(std_cnic=cnic)
@@ -118,10 +135,18 @@ class studentApi(APIView):
             status=status.HTTP_200_OK
         )
 class studentRegistrationApi(APIView):
-    def get(self, request, *args, **kwargs):
-        studentsReg = StudentRegistration.objects.all()
-        studentsReg_serializer = StudentRegistrationSerializer(studentsReg, many=True)
-        return Response(studentsReg_serializer.data)
+    def get(self, request, cnic,*args, **kwargs):
+        try:
+            student_reg = StudentRegistration.objects.get(std_cnic=cnic)
+            # Process the student registration data here
+            student_reg_serializer = StudentRegistrationSerializer(student_reg)
+            return Response(student_reg_serializer.data,status=200)
+        except StudentRegistration.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student registration not found for CNIC: " + cnic},
+                status=400
+            )
     def post(self, request, *args, **kwargs):
         serializer = StudentRegistrationSerializer(data=request.data)
         if serializer.is_valid():
