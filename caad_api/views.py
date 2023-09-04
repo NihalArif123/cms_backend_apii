@@ -95,7 +95,7 @@ class studentApi(APIView):
     #     students_serializer = StudentSerializer(students,many=True)
     #     return Response(students_serializer.data,status=status.HTTP_200_OK)
     def get(self, request, cnic,*args, **kwargs):
-        students= Student.objects.all()
+        students= Student.objects.get(std_cnic=cnic)
         if not students:
             return Response(
                 {"res": "Students not found"},
