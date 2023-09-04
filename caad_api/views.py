@@ -662,22 +662,15 @@ class LateSittingApi(APIView):
     #         return Response(data)
     #     except IdentitycardProforma.DoesNotExist:
     #         return Response({'error': 'Identity card not found'}, status=404)
-    def get(self, request, id, *args, **kwargs):
-        try:
-            student = Student.objects.get(std_cnic=id)
-        except Student.DoesNotExist:
-            return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        # Retrieve the LateSittingProforma related to the student using the depth setting
-        late_sitting_proforma = student.studentregistration_set.first().internships_set.first().latesittingproforma_set.first()
-
-        # Check if late_sitting_proforma exists
-        if late_sitting_proforma:
-            serializer = LateSittingProformaSerializer(late_sitting_proforma)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            # LateSittingProforma does not exist for the student, return an empty response
-            return Response({"null"}, status=status.HTTP_200_OK)
+     def get(self, request, *args, **kwargs):
+        latesitting=LateSittingProforma.objects.all()
+        if not latesitting:
+            return Response(
+                {"res": "Late Sitting Proforma not found"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        latesitting_serializer=LateSittingProformaSerializer(latesitting,many=True)
+        return Response(latesitting_serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         latesitting_data = request.data
