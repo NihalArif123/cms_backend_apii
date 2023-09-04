@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import *
 
 class AccomodationProformaSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = AccomodationProforma
         fields = '__all__'
@@ -102,10 +103,34 @@ class IdentitycardProformaSerializer(serializers.ModelSerializer):
         model = IdentitycardProforma
         fields = '__all__'
 
+
+class StudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = '__all__'
+
+
+class StudentPicturesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentPictures
+        fields = '__all__'
+
+
+class StudentRegistrationSerializer(serializers.ModelSerializer):
+    student = StudentSerializer(read_only= True)
+    class Meta:
+        model = StudentRegistration
+        fields = '__all__'
+        depth =2
+
+
 class InternshipsSerializer(serializers.ModelSerializer):
+    registration = StudentRegistrationSerializer(read_only= True)
     class Meta:
         model = Internships
         fields = '__all__'
+        depth=2
+
 
 
 class ItDeptLoginSerializer(serializers.ModelSerializer):
@@ -114,10 +139,13 @@ class ItDeptLoginSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+
 class LateSittingProformaSerializer(serializers.ModelSerializer):
+    # internship = InternshipsSerializer(read_only= True)
     class Meta:
         model = LateSittingProforma
         fields = '__all__'
+        depth = 2
 
 
 class LoginProformaSerializer(serializers.ModelSerializer):
@@ -150,24 +178,6 @@ class PublicationsListSerializer(serializers.ModelSerializer):
         model = PublicationsList
         fields = '__all__'
     
-
-class StudentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Student
-        fields = '__all__'
-
-
-class StudentPicturesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StudentPictures
-        fields = '__all__'
-
-
-class StudentRegistrationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StudentRegistration
-        fields = '__all__'
-
 
 
 
