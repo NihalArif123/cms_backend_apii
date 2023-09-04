@@ -5,7 +5,7 @@ urlpatterns = [
  path('student', studentApi.as_view()),
     path('student/<str:cnic>', studentApi.as_view()),
     path('studentreg', studentRegistrationApi.as_view()),
-    path('studentreg/<str:cnic>', studentRegistrationApi.as_view()),
+    path('studentreg/<int:id>', studentRegistrationApi.as_view()),
     path('internships', InternshipsApi.as_view()),
     path('internships/<str:id>',InternshipsApi.as_view()),
     path('evaluation', EvaluationProformaApi.as_view()),
@@ -38,7 +38,7 @@ urlpatterns = [
     path('transportsect/<int:id>', CaadTransportVerificationApi.as_view(), name='CaadTransportVerificationApi'), 
 
     path('accomodation', AccomodationProformaApi.as_view(), name="AccomodationProformaApi"),
-    path('accomodation/<int:pk>', AccomodationProformaApi.as_view()),
+    path('accomodation/<int:id>', AccomodationProformaApi.as_view()),
     path('accomodationtype', AccomodationTypeApi.as_view(), name="AccomodationTypeApi"),
     path('accomodationtype/<int:pk>', AccomodationTypeApi.as_view()),
     path('caadaccomodation', CaadAccomodationApi.as_view(), name="CaadAccomodationApi"),

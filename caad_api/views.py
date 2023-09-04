@@ -9,6 +9,8 @@ from caad_api import services
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.db.models import F
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 
@@ -198,6 +200,7 @@ class InternshipsApi(APIView):
         Internships_data = Internships.objects.all()
         Internships_serializer = InternshipsSerializer(Internships_data, many=True)
         return Response(Internships_serializer.data)
+    
     def post(self, request, *args, **kwargs):
         Internships_data=request.data
         try:
@@ -525,33 +528,15 @@ class CaadClearanceVerificationApi(APIView):
         )
     
 class IdentitycardApi(APIView):
-    def get(self, request,id,*args, **kwargs):
-        try:
-            identitycard = IdentitycardProforma.objects.select_related(
-            'internship__registration_no__std_cnic'
-             ).get(internship__registration_no__std_cnic=id)
-        
-            data = {
-                'identity_id': identitycard.identity_id,
-                'identity_apply_date': identitycard.identity_apply_date,
-                'ncp_assigned_regno': identitycard.internship.ncp_assigned_regno,
-                'designation': identitycard.internship.registration_no.designation,
-                'registration_date': identitycard.registration_date,
-                'registration_receipt_number': identitycard.registration_receipt_number,
-                'blood_group': identitycard.blood_group,
-                'identification_mark': identitycard.identification_mark,
-                'application_status': identitycard.application_status,
-                'std_cnic':identitycard.internship.registration_no.std_cnic.std_cnic,
-                'std_name': identitycard.internship.registration_no.std_cnic.std_name,
-                
-
-            # Other fields...
-        }
-
-            return Response(data)
-        except IdentitycardProforma.DoesNotExist:
-            return Response({'error': 'Identity card not found'}, status=404)
-
+    def get(self, request, *args, **kwargs):
+        identity = IdentitycardProforma.objects.all()
+        if not identity:
+            return Response(
+                {"res": "Identity Card not found"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        identity_serializer = IdentitycardProformaSerializer(identity, many=True)
+    
     def post(self, request, *args, **kwargs):
         identity_data = request.data
         try:
@@ -917,12 +902,28 @@ class CaadTransportVerificationApi(APIView):
 
 class AccomodationProformaApi(APIView):
 
-    def get(self, request):
-            accomodation_profs = AccomodationProforma.objects.all()
-            accomodation_prof_serializer = AccomodationProformaSerializer(accomodation_profs, many=True)
-            return Response(accomodation_prof_serializer.data)
+    def get(self, request,id,*args, **kwargs):
+        try:
+            accomodation = AccomodationProforma.objects.select_related(
+            'internship__registration_no__std_cnic'
+             ).get(internship__registration_no__std_cnic=id)
+            Identitycard = accomodation.identity_card.identity_id
+            data = {
+                # 'std_cnic':accomodation.internship.registration_no.std_cnic.std_cnic,
+                'std_name': accomodation.internship.registration_no.std_cnic.std_name,
+                'ncp_assigned_regno': accomodation.internship.ncp_assigned_regno, 
+                'proposed_research_area': accomodation.internship.proposed_research_area,  
+                'proposed_research_end_time': accomodation.internship.proposed_research_end_time, 
+                'present_university_name': accomodation.internship.registration_no.present_university_name,
+                'std_phone_no': accomodation.internship.registration_no.std_cnic.std_phone_no,      
+                'landline_no': accomodation.internship.registration_no.landline_no,  
+                'identity_no':Identitycard,    
+            }
+            return Response(data)
+        except AccomodationProforma.DoesNotExist:
+            return Response({'error': 'Accomodation Proforma not found'}, status=404)
 
-
+    
     def post(self, request):
         accomodation_prof_data = request.data
         try:
