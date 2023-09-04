@@ -11,6 +11,8 @@ from caad_api import services
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.db.models import F
+
 from django.core.exceptions import ObjectDoesNotExist
 
 class send_verification_email(APIView):
@@ -195,6 +197,7 @@ class InternshipsApi(APIView):
         Internships_data = Internships.objects.all()
         Internships_serializer = InternshipsSerializer(Internships_data, many=True)
         return Response(Internships_serializer.data)
+    
     def post(self, request, *args, **kwargs):
         Internships_data=request.data
         try:
@@ -530,7 +533,7 @@ class IdentitycardApi(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         identity_serializer = IdentitycardProformaSerializer(identity, many=True)
-        return Response(identity_serializer.data, status=status.HTTP_200_OK)
+    
     def post(self, request, *args, **kwargs):
         identity_data = request.data
         try:
@@ -840,12 +843,28 @@ class CaadTransportVerificationApi(APIView):
 
 class AccomodationProformaApi(APIView):
 
-    def get(self, request):
-            accomodation_profs = AccomodationProforma.objects.all()
-            accomodation_prof_serializer = AccomodationProformaSerializer(accomodation_profs, many=True)
-            return Response(accomodation_prof_serializer.data)
+    def get(self, request,id,*args, **kwargs):
+        try:
+            accomodation = AccomodationProforma.objects.select_related(
+            'internship__registration_no__std_cnic'
+             ).get(internship__registration_no__std_cnic=id)
+            Identitycard = accomodation.identity_card.identity_id
+            data = {
+                # 'std_cnic':accomodation.internship.registration_no.std_cnic.std_cnic,
+                'std_name': accomodation.internship.registration_no.std_cnic.std_name,
+                'ncp_assigned_regno': accomodation.internship.ncp_assigned_regno, 
+                'proposed_research_area': accomodation.internship.proposed_research_area,  
+                'proposed_research_end_time': accomodation.internship.proposed_research_end_time, 
+                'present_university_name': accomodation.internship.registration_no.present_university_name,
+                'std_phone_no': accomodation.internship.registration_no.std_cnic.std_phone_no,      
+                'landline_no': accomodation.internship.registration_no.landline_no,  
+                'identity_no':Identitycard,    
+            }
+            return Response(data)
+        except AccomodationProforma.DoesNotExist:
+            return Response({'error': 'Accomodation Proforma not found'}, status=404)
 
-
+    
     def post(self, request):
         accomodation_prof_data = request.data
         try:
