@@ -662,7 +662,7 @@ class LateSittingApi(APIView):
     #         return Response(data)
     #     except IdentitycardProforma.DoesNotExist:
     #         return Response({'error': 'Identity card not found'}, status=404)
-     def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         latesitting=LateSittingProforma.objects.all()
         if not latesitting:
             return Response(
