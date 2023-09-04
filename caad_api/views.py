@@ -3,15 +3,17 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework.views import APIView
-from rest_framework import status
-from rest_framework import permissions
 from .models import *
 from .serializers import *
 from caad_api import services
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.db.models import F
+
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
+
 
 class login(APIView):
     def post(self, request, *args, **kwargs):
@@ -93,7 +95,7 @@ class studentApi(APIView):
     #     students_serializer = StudentSerializer(students,many=True)
     #     return Response(students_serializer.data,status=status.HTTP_200_OK)
     def get(self, request, cnic,*args, **kwargs):
-        students= Student.objects.get(std_cnic=cnic)
+        students= Student.objects.all()
         if not students:
             return Response(
                 {"res": "Students not found"},
@@ -134,6 +136,7 @@ class studentApi(APIView):
             {"res": "Object deleted!"},
             status=status.HTTP_200_OK
         )
+
 class studentRegistrationApi(APIView):
     def get(self, request, cnic,*args, **kwargs):
         try:
@@ -154,6 +157,7 @@ class studentRegistrationApi(APIView):
             return Response("Insert Successfully", status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def put(self, request,cnic, *args, **kwargs):
         studentReg_data = StudentRegistration.objects.get(std_cnic=cnic)
         if not studentReg_data:
@@ -220,6 +224,7 @@ class InternshipsApi(APIView):
         Internships_data = Internships.objects.all()
         Internships_serializer = InternshipsSerializer(Internships_data, many=True)
         return Response(Internships_serializer.data)
+    
     def post(self, request, *args, **kwargs):
         Internships_data=request.data
         try:
@@ -555,7 +560,7 @@ class IdentitycardApi(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         identity_serializer = IdentitycardProformaSerializer(identity, many=True)
-        return Response(identity_serializer.data, status=status.HTTP_200_OK)
+    
     def post(self, request, *args, **kwargs):
         identity_data = request.data
         try:
@@ -651,6 +656,36 @@ class CaadIdentityApi(APIView):
 
 
 class LateSittingApi(APIView):
+    # def get(self, request,id,*args, **kwargs):
+    #     try:
+    #         latesit = LateSittingProforma.objects.select_related(
+    #         'internship__registration_no__std_cnic'
+    #          ).get(internship__registration_no__std_cnic=id)
+        
+    #         data = {
+    #             'latesit_id': latesit.latesit_id,
+    #             'late_performa_submitdate': latesit.late_performa_submitdate,
+    #             'latesitting_reason': latesit.latesitting_reason,
+    #             'workarea_during_latework': latesit.workarea_during_latework,
+    #             'lab_contact_no': latesit.lab_contact_no,
+    #             'latesitting_startdate': latesit.latesitting_startdate,
+    #             'latesitting_enddate': latesit.latesitting_enddate,
+    #             'emergency_contact_name': latesit.emergency_contact_name,
+    #             'emergency_contact_number': latesit.emergency_contact_number,
+    #             'emergency_contact_landline': latesit.emergency_contact_landline,
+    #             'attendant_during_latework': latesit.attendant_during_latework,
+    #             'recommended_by_supervisor': latesit.recommended_by_supervisor,
+    #             'std_name': latesit.internship.registration_no.std_cnic.std_name,
+    #             'std_cnic': latesit.internship.registration_no.std_cnic.std_cnic,
+    #             'ncp_assigned_regno': latesit.internship.ncp_assigned_regno,
+    #             'std_phone_no': latesit.internship.registration_no.std_cnic.std_phone_no,
+
+    #         # Other fields...
+    #     }
+
+    #         return Response(data)
+    #     except IdentitycardProforma.DoesNotExist:
+    #         return Response({'error': 'Identity card not found'}, status=404)
     def get(self, request, *args, **kwargs):
         latesitting=LateSittingProforma.objects.all()
         if not latesitting:
@@ -755,15 +790,34 @@ class CaadLatesittingVerificationApi(APIView):
 
 
 class TransportMemFormApi(APIView):
-    def get(self, request, *args, **kwargs):
-        transportform=TransportMemberProforma.objects.all()
-        if not transportform:
-            return Response(
-                {"res": "Transport Member Proforma not found"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        transportform_serializer=TransportMemberProformaSerializer(transportform,many=True)
-        return Response(transportform_serializer.data, status=status.HTTP_200_OK)
+    def get(self, request,id,*args, **kwargs):
+        try:
+            transport = TransportMemberProforma.objects.select_related(
+            'internship__registration_no__std_cnic'
+             ).get(internship__registration_no__std_cnic=id)
+            identitycard = transport.identity_card.identity_id
+            data = {
+                'identitycard': identitycard,
+                'transport_application_date': transport.transport_application_date,
+                'transport_req_start_date': transport.transport_req_start_date,
+                'transport_req_end_date' : transport.transport_req_end_date,
+                'pick_drop_point': transport.pick_drop_point,
+                'lab_contact_no':transport.lab_contact_no,
+                'application_status': transport.application_status,
+                'std_name': transport.internship.registration_no.std_cnic.std_name,
+                'std_phone_no': transport.internship.registration_no.std_cnic.std_phone_no,
+                'proposed_research_area': transport.internship.proposed_research_area,
+                'ncp_assigned_regno': transport.internship.ncp_assigned_regno,
+                'proposed_research_end_time':transport.internship.proposed_research_end_time,
+                
+
+            # Other fields...
+        }
+
+            return Response(data)
+        except IdentitycardProforma.DoesNotExist:
+            return Response({'error': 'Identity card not found'}, status=404)
+
 
     def post(self, request, *args, **kwargs):
         transportform_data = request.data
@@ -865,12 +919,28 @@ class CaadTransportVerificationApi(APIView):
 
 class AccomodationProformaApi(APIView):
 
-    def get(self, request):
-            accomodation_profs = AccomodationProforma.objects.all()
-            accomodation_prof_serializer = AccomodationProformaSerializer(accomodation_profs, many=True)
-            return Response(accomodation_prof_serializer.data)
+    def get(self, request,id,*args, **kwargs):
+        try:
+            accomodation = AccomodationProforma.objects.select_related(
+            'internship__registration_no__std_cnic'
+             ).get(internship__registration_no__std_cnic=id)
+            Identitycard = accomodation.identity_card.identity_id
+            data = {
+                # 'std_cnic':accomodation.internship.registration_no.std_cnic.std_cnic,
+                'std_name': accomodation.internship.registration_no.std_cnic.std_name,
+                'ncp_assigned_regno': accomodation.internship.ncp_assigned_regno, 
+                'proposed_research_area': accomodation.internship.proposed_research_area,  
+                'proposed_research_end_time': accomodation.internship.proposed_research_end_time, 
+                'present_university_name': accomodation.internship.registration_no.present_university_name,
+                'std_phone_no': accomodation.internship.registration_no.std_cnic.std_phone_no,      
+                'landline_no': accomodation.internship.registration_no.landline_no,  
+                'identity_no':Identitycard,    
+            }
+            return Response(data)
+        except AccomodationProforma.DoesNotExist:
+            return Response({'error': 'Accomodation Proforma not found'}, status=404)
 
-
+    
     def post(self, request):
         accomodation_prof_data = request.data
         try:
@@ -909,7 +979,7 @@ class AccomodationProformaApi(APIView):
     def delete(self, request, pk):
         accomodation_prof = AccomodationProforma.objects.get(pk=pk)
         accomodation_prof.delete()
-        return Response("Deleted sucessfully", safe=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # End here Accomodation Proforma API
   
@@ -941,7 +1011,7 @@ class AccomodationTypeApi(APIView):
     def delete(self, request, pk):
         accomodation_type = AccomodationType.objects.get(pk=pk)
         accomodation_type.delete()
-        return Response("Deleted sucessfully", safe=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # Caad Accomodation Verification
@@ -971,7 +1041,7 @@ class CaadAccomodationApi(APIView):
     def delete(self, request, pk):
         caad_accomodation = CaadAccomodationVerification.objects.get(pk=pk)
         caad_accomodation.delete()
-        return Response("Deleted sucessfully", safe=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 #END
 
 #NCP check accomodation
@@ -1002,7 +1072,7 @@ class NcpCheckAccApi(APIView):
     def delete(self, request, pk):
         ncp_accomodation = NcpAccomodationCheck.objects.get(pk=pk)
         ncp_accomodation.delete()
-        return Response("Deleted sucessfully", safe=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 #NCP approval accomodation
 class NcpApprovalAccApi(APIView):
@@ -1033,7 +1103,7 @@ class NcpApprovalAccApi(APIView):
     def delete(self, request, pk):
         ncp_approval_accomodation = NcpAccomodationApproval.objects.get(pk=pk)
         ncp_approval_accomodation.delete()
-        return Response("Deleted sucessfully", safe=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 #Extension Proforma
 
 
