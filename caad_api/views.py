@@ -151,7 +151,13 @@ class studentRegistrationApi(APIView):
                 status=400
             )
     def post(self, request, *args, **kwargs):
-        serializer = StudentRegistrationSerializer(data=request.data)
+        student=Student.objects.get(std_cnic=request.data.get('std_cnic'))
+        print(request.data)
+       # sup_id=UniversitySupervisor.objects.get(supervisor_id=request.data.get('university_supervisor_id'))
+        std_reg=StudentRegistration()
+        std_reg.std_cnic=student
+        #std_reg.university_supervisor=sup_id
+        serializer = StudentRegistrationSerializer(instance=std_reg, data=request.data, partial = True)
         if serializer.is_valid():
             serializer.save()
             return Response("Insert Successfully", status=status.HTTP_201_CREATED)
