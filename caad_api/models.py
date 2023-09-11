@@ -334,7 +334,8 @@ class Internships(models.Model):
     category = models.ForeignKey(HostedresearcherCategory, models.DO_NOTHING, blank=True, null=True)
     registration_no = models.ForeignKey('StudentRegistration', models.DO_NOTHING, db_column='registration_no')
     ncp_assigned_regno = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-
+    university_supervisor = models.ForeignKey('UniversitySupervisor', models.DO_NOTHING)
+    
     class Meta:
         managed = False
         db_table = 'internships'
@@ -508,8 +509,7 @@ class StudentRegistration(models.Model):
     permanent_address = models.CharField(max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     mailing_address = models.CharField(max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     landline_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    university_supervisor = models.ForeignKey('UniversitySupervisor', models.DO_NOTHING)
-
+   
     class Meta:
         managed = False
         db_table = 'student_registration'
