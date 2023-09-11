@@ -6,7 +6,6 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-from django.db.models import F
 
 
 class AccomodationProforma(models.Model):
@@ -323,17 +322,22 @@ class IdentitycardProforma(models.Model):
 
 class Internships(models.Model):
     internship_id = models.AutoField(primary_key=True)
-    proposed_research_area = models.CharField(db_column='proposed_Research_area', max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)  # Field name made lowercase.
-    proposed_research_start_time = models.DateField(db_column='proposed_Research_start_time', blank=True, null=True)  # Field name made lowercase.
-    proposed_research_end_time = models.DateField(db_column='proposed_Research_end_time', blank=True, null=True)  # Field name made lowercase.
-    accomodation_required = models.BooleanField(blank=True, null=True)
+    proposed_research_area = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    proposed_research_start_time = models.DateField(blank=True, null=True)
+    proposed_research_end_time = models.DateField(blank=True, null=True)
+    accomodation_required = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     accomodation_start_time = models.DateField(blank=True, null=True)
     accomodation_end_time = models.DateField(blank=True, null=True)
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     ncp_employee_id = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     category = models.ForeignKey(HostedresearcherCategory, models.DO_NOTHING, blank=True, null=True)
-    registration_no = models.ForeignKey('StudentRegistration', models.DO_NOTHING, db_column='registration_no')
+    registration_no = models.ForeignKey('StudentRegistration', models.DO_NOTHING, db_column='registration_no',null=True)
     ncp_assigned_regno = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    university_supervisor = models.ForeignKey('UniversitySupervisor', models.DO_NOTHING, blank=True, null=True)
+    proposed_research_department = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    is_supervisor_from_ncp = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    is_cosupervisor_from_ncp = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    consulted_date_of_ncp_supervisor = models.DateField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -478,7 +482,7 @@ class Student(models.Model):
     std_phone_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     std_password = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     verification_code = models.IntegerField(blank=True, null=True)
-    verification_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True, default="false")
+    verification_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
 
     class Meta:
         managed = False
@@ -499,16 +503,15 @@ class StudentRegistration(models.Model):
     reg_form_id = models.AutoField(primary_key=True)
     std_cnic = models.ForeignKey(Student, models.DO_NOTHING, db_column='std_cnic')
     dob = models.DateField(blank=True, null=True)
-    highest_qualification = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    academic_record = models.CharField(db_column='academic_Record', max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)  # Field name made lowercase.
-    present_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    designation = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    highest_qualification = models.CharField(max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    academic_record = models.CharField(db_column='academic_Record', max_length=250, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)  # Field name made lowercase.
+    present_status = models.CharField(max_length=250, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    designation = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     university_reg_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    present_university_name = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    permanent_address = models.CharField(max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    mailing_address = models.CharField(max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    present_university_name = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    permanent_address = models.CharField(max_length=200, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    mailing_address = models.CharField(max_length=200, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     landline_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    university_supervisor = models.ForeignKey('UniversitySupervisor', models.DO_NOTHING)
 
     class Meta:
         managed = False
@@ -538,6 +541,7 @@ class UniversitySupervisor(models.Model):
     supervisor_phone_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     supervisor_fax_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     supervisor_email = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    supervisor_department = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
 
     class Meta:
         managed = False
