@@ -117,7 +117,7 @@ class StudentPicturesSerializer(serializers.ModelSerializer):
 
 
 class StudentRegistrationSerializer(serializers.ModelSerializer):
-    student = StudentSerializer(read_only= True)
+    #student = StudentSerializer()
     class Meta:
         model = StudentRegistration
         fields = '__all__'
@@ -125,7 +125,7 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
 
 
 class InternshipsSerializer(serializers.ModelSerializer):
-    registration = StudentRegistrationSerializer(read_only= True)
+    #registration = StudentRegistrationSerializer(read_only= True)
     class Meta:
         model = Internships
         fields = '__all__'
