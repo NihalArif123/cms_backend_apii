@@ -334,6 +334,7 @@ class Internships(models.Model):
     category = models.ForeignKey(HostedresearcherCategory, models.DO_NOTHING, blank=True, null=True)
     registration_no = models.ForeignKey('StudentRegistration', models.DO_NOTHING, db_column='registration_no')
     ncp_assigned_regno = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    university_supervisor = models.ForeignKey('UniversitySupervisor', models.DO_NOTHING)
 
     class Meta:
         managed = False
@@ -499,16 +500,16 @@ class StudentRegistration(models.Model):
     reg_form_id = models.AutoField(primary_key=True)
     std_cnic = models.ForeignKey(Student, models.DO_NOTHING, db_column='std_cnic')
     dob = models.DateField(blank=True, null=True)
-    highest_qualification = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    academic_record = models.CharField(db_column='academic_Record', max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)  # Field name made lowercase.
-    present_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    highest_qualification = models.CharField(max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    academic_record = models.CharField(db_column='academic_Record', max_length=250, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)  # Field name made lowercase.
+    present_status = models.CharField(max_length=250, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     designation = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     university_reg_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     present_university_name = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     permanent_address = models.CharField(max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     mailing_address = models.CharField(max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     landline_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    university_supervisor = models.ForeignKey('UniversitySupervisor', models.DO_NOTHING)
+    
 
     class Meta:
         managed = False
