@@ -260,27 +260,74 @@ class InternshipsApi(APIView):
     
     def post(self, request, *args, **kwargs):
         Internships_data=request.data
+        print(Internships_data)
         try:
-            std_cnic = Internships_data['std_cnic']
+            std_cnic = Internships_data['cnic']
         except KeyError:
             return Response({"message": "Missing 'std_cnic' field in the request data"}, status=400)
         try:
             student_registration = StudentRegistration.objects.get(std_cnic=std_cnic)
         except StudentRegistration.DoesNotExist:
            return Response({"message": "Student registration not found"}, status=404)
-        Internships_serializer = InternshipsSerializer(data=Internships_data) 
+        category_name = Internships_data['category']
+        try:
+            category = HostedresearcherCategory.objects.get(category_name=category_name)
+        except HostedresearcherCategory.DoesNotExist:
+            return Response({"message": "Category not found"}, status=404)
+        university_supervisor={
+            'supervisor_name': Internships_data['supervisor_name'],
+            'supervisor_department': Internships_data['supervisor_department'],
+            'supervisor_designation': Internships_data['supervisor_designation'],
+            'supervisor_email': Internships_data['supervisor_email'],
+            'supervisor_fax_no': Internships_data['supervisor_fax_no'],
+            'supervisor_phone_no': Internships_data['supervisor_phone_no'],
+        }
+        uni_supervisor_serializer = UniversitySupervisorSerializer(data=university_supervisor)
+        if uni_supervisor_serializer.is_valid():
+            university_supervisor = uni_supervisor_serializer.save()
+        else:
+            return Response("not uni", status=status.HTTP_400_BAD_REQUEST)
+            
+        new_data={
+            'accomodation_required': Internships_data['accomodation_required'],
+            'proposed_research_area': Internships_data['proposed_research_area'],
+            'proposed_research_start_time': Internships_data['proposed_research_start_time'],
+            'proposed_research_end_time': Internships_data['proposed_research_end_time'],
+            'accomodation_start_time': Internships_data['accomodation_start_time'],
+            'accomodation_end_time': Internships_data['accomodation_end_time'],
+            'proposed_research_department': Internships_data['proposed_research_department'],
+            'is_supervisor_from_ncp': Internships_data['is_supervisor_from_ncp'],
+            'is_cosupervisor_from_ncp': Internships_data['is_cosupervisor_from_ncp'],
+            'consulted_date_of_ncp_supervisor': Internships_data['consulted_date_of_ncp_supervisor'],
+        }
+        internship_obj=Internships()
+        internship_obj.university_supervisor=university_supervisor
+        internship_obj.category=category
+        internship_obj.registration_no= student_registration
+        internship_obj.ncp_employee_id= "139"
+        Internships_serializer = InternshipsSerializer(instance =internship_obj, data=new_data, partial=True)
         if Internships_serializer.is_valid():
-            internship=Internships_serializer.save()
+            internship = Internships_serializer.save()
+            print(internship.registration_no)
+            
             caad_registration_verification_data = {
                 'internship': internship.internship_id,
             }
+            
             caad_registration_verification_serializer = CaadRegistrationVerificationSerializer(
                 data=caad_registration_verification_data
             )
+            
             if caad_registration_verification_serializer.is_valid():
                 caad_registration_verification_serializer.save()
-            return Response("Insert Successfully", status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response("Insert Successfully", status=status.HTTP_201_CREATED)
+            else:
+                # Handle errors for the CaadRegistrationVerification serializer
+                return Response("Error in CaadRegistrationVerification serialization", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # Handle errors for the Internships serializer
+            print("Internships serializer errors:", Internships_serializer.errors)
+            return Response("Error in Internships serialization", status=status.HTTP_400_BAD_REQUEST)
     def put(self, request,id, *args, **kwargs): 
         Internshipdata=Internships.objects.get(internship_id=id)
         if not Internshipdata:
