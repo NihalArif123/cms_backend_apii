@@ -637,7 +637,7 @@ class IdentitycardApi(APIView):
             student = Student.objects.get(std_cnic=cnic)
             student_reg = StudentRegistration.objects.get(std_cnic=student)
             Internship_data = Internships.objects.get(registration_no=student_reg)
-            identity_data = IdentitycardProforma.objects.get(identity_id=Internship_data)
+            identity_data = IdentitycardProforma.objects.get(internship_id=Internship_data)
             Identity_serializer = IdentitycardProformaSerializer(identity_data)
             return Response(Identity_serializer.data,status=200)
         except Student.DoesNotExist:
