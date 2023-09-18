@@ -11,12 +11,13 @@ from django.db import models
 class AccomodationProforma(models.Model):
     ac_id = models.AutoField(primary_key=True)
     internship = models.ForeignKey('Internships', models.DO_NOTHING)
-    identity_card = models.ForeignKey('IdentitycardProforma', models.DO_NOTHING)
+    identity= models.ForeignKey('IdentitycardProforma', models.DO_NOTHING)
     date_of_application = models.DateField()
     security_and_police_proforma = models.BooleanField()
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    challan_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-
+    accomodation_start_date = models.DateField(blank=True, null=True)
+    accomodation_end_date = models.DateField(blank=True, null=True)
+    institute_type = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     class Meta:
         managed = False
         db_table = 'accomodation_proforma'
@@ -522,7 +523,7 @@ class TransportMemberProforma(models.Model):
     transport_form_id = models.AutoField(primary_key=True)
     transport_application_date = models.DateField(blank=True, null=True)
     internship = models.ForeignKey(Internships, models.DO_NOTHING)
-    identity_card = models.ForeignKey(IdentitycardProforma, models.DO_NOTHING, blank=True, null=True)
+    identity = models.ForeignKey(IdentitycardProforma, models.DO_NOTHING, blank=True, null=True)
     transport_req_start_date = models.DateField(blank=True, null=True)
     transport_req_end_date = models.DateField(blank=True, null=True)
     pick_drop_point = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
