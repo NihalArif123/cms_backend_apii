@@ -637,7 +637,7 @@ class IdentitycardApi(APIView):
             student = Student.objects.get(std_cnic=cnic)
             student_reg = StudentRegistration.objects.get(std_cnic=student)
             Internship_data = Internships.objects.get(registration_no=student_reg)
-            identity_data = IdentitycardProforma.objects.get(identity_id=Internship_data)
+            identity_data = IdentitycardProforma.objects.get(internship_id=Internship_data)
             Identity_serializer = IdentitycardProformaSerializer(identity_data)
             return Response(Identity_serializer.data,status=200)
         except Student.DoesNotExist:
@@ -668,18 +668,33 @@ class IdentitycardApi(APIView):
     
     def post(self, request, *args, **kwargs):
         identity_data = request.data
+        print(identity_data)
         try:
             std_cnic = identity_data['std_cnic']
         except KeyError:
             return Response({"message": "Missing std_cnic"}, status=400)
 
         internship=services.get_internship(std_cnic)
-        identity_data['internship'] = internship
+        identity_data['internship'] = internship.internship_id
         identity_serializer = IdentitycardProformaSerializer(data=identity_data)
         if identity_serializer.is_valid():
-            identity_serializer.save()
-            return Response(identity_serializer.data, status=status.HTTP_201_CREATED)
+            identity=identity_serializer.save()
+           
+            caad_identity_verification_data = {
+                'identity': identity.identity_id,
+            }
+            caad_identity_verification_serializer =CaadIdentityVerificationSerializer(
+                data=caad_identity_verification_data
+            )
+            if caad_identity_verification_serializer.is_valid():
+                caad_identity_verification_serializer.save() 
+                return Response("Insert Successfully", status=status.HTTP_201_CREATED)
+            else:
+                # Handle errors for the CaadRegistrationVerification serializer
+                return Response("Error in CaadIdentityVerification serialization", status=status.HTTP_400_BAD_REQUEST)
+          
         return Response(identity_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+       
     def put(self, request, pk, *args, **kwargs):
         try:
             identity = IdentitycardProforma.objects.get(pk=pk)
@@ -925,19 +940,19 @@ class TransportMemFormApi(APIView):
 
 
     def post(self, request, *args, **kwargs):
-        transportform_data = request.data
+        transport_data = request.data
         try:
-            std_cnic = transportform_data['std_cnic']
+            std_cnic = transport_data['std_cnic']
         except KeyError:
             return Response({"message": "Missing std_cnic"}, status=400)
         internship=services.get_internship(std_cnic)
-        identity=services.get_identity(internship)
-        transportform_data['internship']=internship
-        transportform_data['identity_card']=identity
-        transportform_serializer = TransportMemberProformaSerializer(data=transportform_data)
+        identity=services.get_identity(internship.internship_id)
+        transport_obj=TransportMemberProforma()
+        transport_obj.internship=internship
+        transport_obj.identity=identity
+        transportform_serializer = TransportMemberProformaSerializer(instance =transport_obj, data=transport_data, partial=True)
         if transportform_serializer.is_valid():
             transport=transportform_serializer.save()
-            print(transport)
             caadtransportsect_verification_data = {
                 'transport_form': transport.transport_form_id,
             }
@@ -1048,16 +1063,18 @@ class AccomodationProformaApi(APIView):
     
     def post(self, request):
         accomodation_prof_data = request.data
+        print( accomodation_prof_data)
         try:
             std_cnic = accomodation_prof_data['std_cnic']
         except KeyError:
             return Response({"message": "Missing std_cnic"}, status=400)
 
         internship=services.get_internship(std_cnic)
-        identity=services.get_identity(internship)
-        accomodation_prof_data['internship'] = internship
-        accomodation_prof_data['identity_card']=identity
-        accomodation_prof_serializer = AccomodationProformaSerializer(data=accomodation_prof_data)
+        identity=services.get_identity(internship.internship_id)
+        acc_obj=AccomodationProforma()
+        acc_obj.internship=internship
+        acc_obj.identity=identity
+        accomodation_prof_serializer = AccomodationProformaSerializer(instance =acc_obj, data=accomodation_prof_data, partial=True)
         if accomodation_prof_serializer.is_valid():
             accomodation = accomodation_prof_serializer.save()
             caad_accomodation_verification_data = {
