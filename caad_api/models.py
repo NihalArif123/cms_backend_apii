@@ -293,17 +293,21 @@ class EvaluationProforma(models.Model):
 
 class ExtensionProforma(models.Model):
     extension_form_id = models.AutoField(primary_key=True)
-    apply_date = models.DateField(blank=True, null=True)
     internship = models.ForeignKey('Internships', models.DO_NOTHING)
     reason_for_extension = models.CharField(max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS')
     reqperiod_ex_startdate = models.DateField()
     reqperiod_ex_enddate = models.DateField()
-    accomodation = models.BooleanField()
-    transport = models.BooleanField()
+    accomodation = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS')
+    transport = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS')
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+<<<<<<< HEAD
+    recomendation=models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS')
+    extension_apply_date = models.DateField(blank=True, null=True)
+=======
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     pdf_form = models.BinaryField(blank=True, null=True)
 
+>>>>>>> upstream/main
     class Meta:
         managed = False
         db_table = 'extension_proforma'
@@ -380,13 +384,13 @@ class ItDeptLogin(models.Model):
 
 class LateSittingProforma(models.Model):
     latesit_id = models.AutoField(primary_key=True)
-    late_performa_submitdate = models.DateField(blank=True, null=True)
+    late_performa_application_date = models.DateField(blank=True, null=True)
     internship = models.ForeignKey(Internships, models.DO_NOTHING)
     latesitting_reason = models.CharField(max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     workarea_during_latework = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     lab_contact_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    latesitting_startdate = models.DateField(blank=True, null=True)
-    latesitting_enddate = models.DateField(blank=True, null=True)
+    latesitting_startdate = models.TimeField(blank=True, null=True)
+    latesitting_enddate = models.TimeField(blank=True, null=True)
     emergency_contact_name = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     emergency_contact_number = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     emergency_contact_landline = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
