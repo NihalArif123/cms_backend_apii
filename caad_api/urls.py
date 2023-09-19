@@ -38,7 +38,7 @@ urlpatterns = [
     path('transportsect', CaadTransportVerificationApi.as_view(), name='CaadTransportVerificationApi'),  
     path('transportsect/<int:id>', CaadTransportVerificationApi.as_view(), name='CaadTransportVerificationApi'), 
     path('accomodation', AccomodationProformaApi.as_view(), name="AccomodationProformaApi"),
-    path('accomodation/<int:id>', AccomodationProformaApi.as_view()),
+    path('accomodation/<str:cnic>', AccomodationProformaApi.as_view()),
     path('accomodationtype', AccomodationTypeApi.as_view(), name="AccomodationTypeApi"),
     path('accomodationtype/<int:pk>', AccomodationTypeApi.as_view()),
     path('caadaccomodation', CaadAccomodationApi.as_view(), name="CaadAccomodationApi"),
