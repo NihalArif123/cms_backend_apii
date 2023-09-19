@@ -90,6 +90,17 @@ DATABASES = {
                 'driver': 'ODBC Driver 17 for SQL Server',
             },
         },
+        # 'default': {
+        #     'ENGINE': 'mssql',
+        #     'NAME': 'cmscaad.bacpac',
+        #     'USER': 'amna',
+        #     'PASSWORD': 'amna1234',
+        #     'HOST': 'DESKTOP-N0C0S9S',
+        #     'PORT': '',
+        #     'OPTIONS': {
+        #         'driver': 'ODBC Driver 17 for SQL Server',
+        #     },
+        # },
     }
 
 
