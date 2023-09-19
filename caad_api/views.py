@@ -354,9 +354,38 @@ class InternshipsApi(APIView):
         )
 
 class EvaluationProformaApi(APIView):
-    def get(self, request, *args, **kwargs):
-        Evaluations_data = EvaluationProforma.objects.all()
-        Evaluation_serializer = EvaluationProformaSerializer(Evaluations_data, many=True)
+    def get(self, request, cnic,*args, **kwargs):
+        try:
+            student = Student.objects.get(std_cnic=cnic)
+            student_reg = StudentRegistration.objects.get(std_cnic=student)
+            Internship_data = Internships.objects.get(registration_no=student_reg)
+            evaluation_data = EvaluationProforma.objects.get(internship_id=Internship_data)
+            evaluation_serializer = EvaluationProformaSerializer(evaluation_data)
+            return Response(evaluation_serializer.data,status=200)
+        except Student.DoesNotExist:
+        # Handle the case where the student record doesn't exist
+            return Response(
+            {"res": "Student not found for CNIC: " + cnic},
+            status=404
+            )
+        except StudentRegistration.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student registration not found for CNIC: " + cnic},
+                status=404
+            )
+        except Internships.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student Internships not found for CNIC: " + cnic},
+                status=404
+            )
+        except EvaluationProforma.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student Evaluation Request not found for CNIC: " + cnic},
+                status=404
+            )
         return Response(Evaluation_serializer.data)
     def post(self, request, *args, **kwargs):
         Evaluations_data=request.data
@@ -500,15 +529,39 @@ class CaadEvaluationVerificationApi(APIView):
         )
 
 class ClearancePerformaApi(APIView):
-    def get(self, request, *args, **kwargs):
-        ClearancePerforma_data = ClearancePerforma.objects.all()
-        if not ClearancePerforma_data:
+    def get(self, request, cnic,*args, **kwargs):
+        try:
+            student = Student.objects.get(std_cnic=cnic)
+            student_reg = StudentRegistration.objects.get(std_cnic=student)
+            Internship_data = Internships.objects.get(registration_no=student_reg)
+            clearance_data = ClearancePerforma.objects.get(internship_id=Internship_data)
+            clearance_serializer = ClearancePerformaSerializer(clearance_data)
+            return Response(clearance_serializer.data,status=200)
+        except Student.DoesNotExist:
+        # Handle the case where the student record doesn't exist
             return Response(
-                {"res": "Not found"},
-                status=status.HTTP_400_BAD_REQUEST
+            {"res": "Student not found for CNIC: " + cnic},
+            status=404
             )
-        ClearancePerforma_serializer =ClearancePerformaSerializer(ClearancePerforma_data, many=True)
-        return Response(ClearancePerforma_serializer.data,status=status.HTTP_200_OK)
+        except StudentRegistration.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student registration not found for CNIC: " + cnic},
+                status=404
+            )
+        except Internships.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student Internships not found for CNIC: " + cnic},
+                status=404
+            )
+        except ClearancePerforma.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student Clearance Request not found for CNIC: " + cnic},
+                status=404
+            )
+
     def post(self, request, *args, **kwargs):
         serializer = ClearancePerformaSerializer(data=request.data)
         if serializer.is_valid():
@@ -776,45 +829,38 @@ class CaadIdentityApi(APIView):
 
 
 class LateSittingApi(APIView):
-    # def get(self, request,id,*args, **kwargs):
-    #     try:
-    #         latesit = LateSittingProforma.objects.select_related(
-    #         'internship__registration_no__std_cnic'
-    #          ).get(internship__registration_no__std_cnic=id)
-        
-    #         data = {
-    #             'latesit_id': latesit.latesit_id,
-    #             'late_performa_submitdate': latesit.late_performa_submitdate,
-    #             'latesitting_reason': latesit.latesitting_reason,
-    #             'workarea_during_latework': latesit.workarea_during_latework,
-    #             'lab_contact_no': latesit.lab_contact_no,
-    #             'latesitting_startdate': latesit.latesitting_startdate,
-    #             'latesitting_enddate': latesit.latesitting_enddate,
-    #             'emergency_contact_name': latesit.emergency_contact_name,
-    #             'emergency_contact_number': latesit.emergency_contact_number,
-    #             'emergency_contact_landline': latesit.emergency_contact_landline,
-    #             'attendant_during_latework': latesit.attendant_during_latework,
-    #             'recommended_by_supervisor': latesit.recommended_by_supervisor,
-    #             'std_name': latesit.internship.registration_no.std_cnic.std_name,
-    #             'std_cnic': latesit.internship.registration_no.std_cnic.std_cnic,
-    #             'ncp_assigned_regno': latesit.internship.ncp_assigned_regno,
-    #             'std_phone_no': latesit.internship.registration_no.std_cnic.std_phone_no,
-
-    #         # Other fields...
-    #     }
-
-    #         return Response(data)
-    #     except IdentitycardProforma.DoesNotExist:
-    #         return Response({'error': 'Identity card not found'}, status=404)
-    def get(self, request, *args, **kwargs):
-        latesitting=LateSittingProforma.objects.all()
-        if not latesitting:
+    def get(self, request, cnic,*args, **kwargs):
+        try:
+            student = Student.objects.get(std_cnic=cnic)
+            student_reg = StudentRegistration.objects.get(std_cnic=student)
+            Internship_data = Internships.objects.get(registration_no=student_reg)
+            sitting_data = LateSittingProforma.objects.get(internship_id=Internship_data)
+            sitting_serializer = LateSittingProformaSerializer(sitting_data)
+            return Response(sitting_serializer.data,status=200)
+        except Student.DoesNotExist:
+        # Handle the case where the student record doesn't exist
             return Response(
-                {"res": "Late Sitting Proforma not found"},
-                status=status.HTTP_400_BAD_REQUEST
+            {"res": "Student not found for CNIC: " + cnic},
+            status=404
             )
-        latesitting_serializer=LateSittingProformaSerializer(latesitting,many=True)
-        return Response(latesitting_serializer.data, status=status.HTTP_200_OK)
+        except StudentRegistration.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student registration not found for CNIC: " + cnic},
+                status=404
+            )
+        except Internships.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student Internships not found for CNIC: " + cnic},
+                status=404
+            )
+        except LateSittingProforma.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student Late Sitting Request not found for CNIC: " + cnic},
+                status=404
+            )
 
     def post(self, request, *args, **kwargs):
         latesitting_data = request.data
@@ -910,34 +956,38 @@ class CaadLatesittingVerificationApi(APIView):
 
 
 class TransportMemFormApi(APIView):
-    def get(self, request,id,*args, **kwargs):
+    def get(self, request, cnic,*args, **kwargs):
         try:
-            transport = TransportMemberProforma.objects.select_related(
-            'internship__registration_no__std_cnic'
-             ).get(internship__registration_no__std_cnic=id)
-            identitycard = transport.identity_card.identity_id
-            data = {
-                'identitycard': identitycard,
-                'transport_application_date': transport.transport_application_date,
-                'transport_req_start_date': transport.transport_req_start_date,
-                'transport_req_end_date' : transport.transport_req_end_date,
-                'pick_drop_point': transport.pick_drop_point,
-                'lab_contact_no':transport.lab_contact_no,
-                'application_status': transport.application_status,
-                'std_name': transport.internship.registration_no.std_cnic.std_name,
-                'std_phone_no': transport.internship.registration_no.std_cnic.std_phone_no,
-                'proposed_research_area': transport.internship.proposed_research_area,
-                'ncp_assigned_regno': transport.internship.ncp_assigned_regno,
-                'proposed_research_end_time':transport.internship.proposed_research_end_time,
-                
-
-            # Other fields...
-        }
-
-            return Response(data)
-        except IdentitycardProforma.DoesNotExist:
-            return Response({'error': 'Identity card not found'}, status=404)
-
+            student = Student.objects.get(std_cnic=cnic)
+            student_reg = StudentRegistration.objects.get(std_cnic=student)
+            Internship_data = Internships.objects.get(registration_no=student_reg)
+            transport_data = TransportMemberProforma.objects.get(internship_id=Internship_data)
+            tansport_serializer = TransportMemberProformaSerializer(transport_data)
+            return Response(tansport_serializer.data,status=200)
+        except Student.DoesNotExist:
+        # Handle the case where the student record doesn't exist
+            return Response(
+            {"res": "Student not found for CNIC: " + cnic},
+            status=404
+            )
+        except StudentRegistration.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student registration not found for CNIC: " + cnic},
+                status=404
+            )
+        except Internships.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student Internships not found for CNIC: " + cnic},
+                status=404
+            )
+        except TransportMemberProforma.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student Transport Request not found for CNIC: " + cnic},
+                status=404
+            )
 
     def post(self, request, *args, **kwargs):
         transport_data = request.data
@@ -1241,10 +1291,38 @@ class NcpApprovalAccApi(APIView):
 
 
 class ExtensionProformaApi(APIView):
-    def get(self, request, id=0):
-        extension_profs = ExtensionProforma.objects.all()
-        extension_prof_serializer = ExtensionProformaSerializer(extension_profs, many=True)
-        return Response(extension_prof_serializer.data)
+    def get(self, request, cnic,*args, **kwargs):
+        try:
+            student = Student.objects.get(std_cnic=cnic)
+            student_reg = StudentRegistration.objects.get(std_cnic=student)
+            Internship_data = Internships.objects.get(registration_no=student_reg)
+            extension_data = ExtensionProforma.objects.get(internship_id=Internship_data)
+            ext_serializer = ExtensionProformaSerializer(extension_data)
+            return Response(ext_serializer.data,status=200)
+        except Student.DoesNotExist:
+        # Handle the case where the student record doesn't exist
+            return Response(
+            {"res": "Student not found for CNIC: " + cnic},
+            status=404
+            )
+        except StudentRegistration.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student registration not found for CNIC: " + cnic},
+                status=404
+            )
+        except Internships.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student Internships not found for CNIC: " + cnic},
+                status=404
+            )
+        except ExtensionProforma.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student extension not found for CNIC: " + cnic},
+                status=404
+            )
 
     def post(self, request):
         extension_prof_data = request.data
@@ -1316,10 +1394,38 @@ class CaadExtensionVerificationApi(APIView):
 #Login Proforma
 
 class LoginProformaApi(APIView):
-    def get(self, request, id=0):
-        login_profs = LoginProforma.objects.all()
-        login_prof_serializer = LoginProformaSerializer(login_profs, many=True)
-        return Response(login_prof_serializer.data)
+    def get(self, request, cnic,*args, **kwargs):
+        try:
+            student = Student.objects.get(std_cnic=cnic)
+            student_reg = StudentRegistration.objects.get(std_cnic=student)
+            Internship_data = Internships.objects.get(registration_no=student_reg)
+            login_data = LoginProforma.objects.get(internship_id=Internship_data)
+            log_serializer = LoginProformaSerializer(login_data)
+            return Response(log_serializer.data,status=200)
+        except Student.DoesNotExist:
+        # Handle the case where the student record doesn't exist
+            return Response(
+            {"res": "Student not found for CNIC: " + cnic},
+            status=404
+            )
+        except StudentRegistration.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student registration not found for CNIC: " + cnic},
+                status=404
+            )
+        except Internships.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student Internships not found for CNIC: " + cnic},
+                status=404
+            )
+        except LoginProforma.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student Account Request not found for CNIC: " + cnic},
+                status=404
+            )
 
 
     def post(self, request):
