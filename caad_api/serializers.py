@@ -1,5 +1,17 @@
 from rest_framework import serializers
 from .models import *
+from binascii import unhexlify
+
+class HexBinaryField(serializers.Field):
+    def to_representation(self, obj):
+        return obj
+
+    def to_internal_value(self, data):
+        try:
+            return unhexlify(data)
+        except Exception as e:
+            raise serializers.ValidationError(str(e))
+
 
 class AccomodationProformaSerializer(serializers.ModelSerializer):
 
@@ -105,16 +117,20 @@ class IdentitycardProformaSerializer(serializers.ModelSerializer):
 
 
 class StudentSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Student
         fields = '__all__'
 
 
 class StudentPicturesSerializer(serializers.ModelSerializer):
+    # image = HexBinaryField(required=False)
     class Meta:
         model = StudentPictures
+        #fields = ('image',)
         fields = '__all__'
-
+ 
+   
 
 class StudentRegistrationSerializer(serializers.ModelSerializer):
     #student = StudentSerializer()

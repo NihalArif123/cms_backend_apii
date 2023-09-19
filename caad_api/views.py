@@ -13,6 +13,7 @@ from django.db.models import F
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 
 
 class login(APIView):
@@ -53,9 +54,24 @@ class send_verification_email(APIView):
                     student.save()
             except ObjectDoesNotExist:
                 verification_code = services.generate_verification_code()
-                student = Student(std_email=email, std_cnic=cnic, std_name=std_name, verification_code=verification_code,verification_status="false",std_password=password)
-                student.save()
-            
+                # Create a Student instance with some fields
+                student_data = {
+                    'std_email': email,
+                    'std_cnic': cnic,
+                    'std_name': std_name,
+                    'verification_code': verification_code,
+                    'verification_status': "false",
+                    'std_password': password,
+                }
+
+                #  student = Student(std_email=email, std_cnic=cnic, std_name=std_name, verification_code=verification_code,verification_status="false",std_password=password)
+                student_serializer = StudentSerializer(data=student_data)
+                if student_serializer.is_valid():
+                    student = student_serializer.save()  # Save the Student object
+
+                else:
+                    return Response(student_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                
             message = f'Your verification code is: {verification_code}'
             send_mail('Verification Code', message, 'caadportal@gmail.com', [email])
             return Response({"res": "Email Sent Successfully"}, status=200)
@@ -81,9 +97,132 @@ class verify_code(APIView):
                     return Response({"res":"Code does not match.Try again"},status=400)
 
             except ObjectDoesNotExist:
-                    return Response({"res":"student not"},status=400)
+                return Response({"res":"student not"},status=400)
         except Exception as e:
-             return Response({"res": "An error occurred while verifying the verification code"}, status=500)
+            
+            
+            return Response({"res": "An error occurred while verifying the verification code"}, status=500)
+
+class studentPictures(APIView):
+    def get(self, request, cnic, *args, **kwargs):
+        try:
+            # Fetch the StudentPictures instance for the given CNIC
+            stdpics = StudentPictures.objects.filter(std_cnic=cnic).first()
+
+            if stdpics is not None and stdpics.image is not None:
+                # Serialize the image data using the serializer
+                serializer = StudentPicturesSerializer(stdpics)
+
+                # Retrieve the serialized data
+                serialized_data = serializer.data
+
+                # Get the binary image data from the serialized data
+                image_data = serialized_data.get('image')
+
+                # Create a response containing the binary image data
+                response = Response(image_data, content_type='image/jpeg')  # Modify content_type as needed
+
+                return response
+            else:
+                return Response({"error": "Image not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # def get(self, request, cnic, *args, **kwargs):
+        
+        #     stdpics = StudentPictures.objects.filter(std_cnic=cnic).first()
+
+        #     # Serialize the StudentPictures instance
+        #     serializer = StudentPicturesSerializer(stdpics)
+
+        #     return Response(serializer.data, status=status.HTTP_200_OK)
+        # except StudentPictures.DoesNotExist:
+        #     return Response({"error": "Student Pictures not found"}, status=status.HTTP_404_NOT_FOUND)
+        # except Exception as e:
+        #     return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            # Validate and deserialize the incoming data using the serializer
+            serializer = StudentPicturesSerializer(data=request.data)
+            if serializer.is_valid():
+                # Save the deserialized data to the database
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self, request, cnic, *args, **kwargs):
+        print("put called", cnic)
+        stdpics_data = StudentPictures.objects.filter(std_cnic=cnic).first()
+
+        if stdpics_data is not None:
+            image = request.FILES['image']
+            file_content = image.read()
+            stdpics_data.image= file_content
+
+            serializer = StudentPicturesSerializer(instance=stdpics_data,data= request.data,partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"res": "Object does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+
+class documentsUpload(APIView):
+    def get(self, request, cnic, *args, **kwargs):
+        try:
+            docs = DocumentsUpload.objects.filter(std_cnic=cnic).first()
+
+            # Serialize the StudentPictures instance
+            serializer = DocumentsUploadSerializer(docs)
+
+            return Response(serializer.data, content_type='image/jpeg', status=status.HTTP_200_OK)
+        except documentsUpload.DoesNotExist:
+            return Response({"error": "Documents not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request, *args, **kwargs):
+       
+            cnic = request.data.get('std_cnic')  # Assuming 'cnic' is the field containing the CNIC
+            # Check if a record with the given CNIC exists
+            existing_record = DocumentsUpload.objects.filter(std_cnic=cnic).first()
+
+            if existing_record:
+            # If a record with the CNIC exists, update it with the new data
+                serializer = DocumentsUploadSerializer(existing_record, data=request.data)
+            else:
+                # If no record with the CNIC exists, create a new record
+                serializer = DocumentsUploadSerializer(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+       
+
+
+    def put(self, request, cnic, *args, **kwargs):
+        print("put called", cnic)
+        docs_data = DocumentsUpload.objects.filter(std_cnic=cnic).first()
+
+        if docs_data is not None:
+            image = request.FILES['image']
+            file_content = image.read()
+            docs_data.image= file_content
+
+            serializer = DocumentsUpload.Serializer(instance=docs_data,data= request.data,partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"res": "Object does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class studentApi(APIView):
     # def get(self, request, *args, **kwargs):
     #     students = Student.objects.all()
@@ -106,7 +245,23 @@ class studentApi(APIView):
     def post(self, request, *args, **kwargs):
         serializer = StudentSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            student = serializer.save()
+            print(student.std_cnic)
+            
+            student_pictures_data = {
+                'std_cnic': student.std_cnic,
+            }
+            
+            student_pictures_serializer = StudentPicturesSerializer(
+                data=student_pictures_data
+            )
+            
+            if student_pictures_serializer.is_valid():
+                student_pictures_serializer.save()
+                return Response("Insert Successfully", status=status.HTTP_201_CREATED)
+            else:
+                # Handle errors for the CaadRegistrationVerification serializer
+                return Response("Error in Student Pictures serialization", status=status.HTTP_400_BAD_REQUEST)
             return Response("Insert Successfully", status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=400)

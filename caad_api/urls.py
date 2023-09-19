@@ -2,8 +2,12 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [ 
- path('student', studentApi.as_view()),
+    path('student', studentApi.as_view()),
     path('student/<str:cnic>', studentApi.as_view()),
+    path('studentpic', studentPictures.as_view()),
+    path('studentpic/<str:cnic>', studentPictures.as_view()),
+    path('docs', documentsUpload.as_view()),
+    path('docs/<str:cnic>', documentsUpload.as_view()),
     path('studentreg', studentRegistrationApi.as_view()),
     path('studentreg/<str:cnic>', studentRegistrationApi.as_view()),
     path('internships/<str:cnic>', InternshipsApi.as_view()),
