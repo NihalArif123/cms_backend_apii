@@ -311,6 +311,7 @@ class Migration(migrations.Migration):
             name='ExtensionProforma',
             fields=[
                 ('extension_form_id', models.AutoField(primary_key=True, serialize=False)),
+                ('approval_date', models.DateField(blank=True, null=True)),
                 ('apply_date', models.DateField(blank=True, null=True)),
                 ('reason_for_extension', models.CharField(db_collation='SQL_Latin1_General_CP1_CI_AS', max_length=150)),
                 ('reqperiod_ex_startdate', models.DateField()),
