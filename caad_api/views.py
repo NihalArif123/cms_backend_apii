@@ -637,7 +637,7 @@ class IdentitycardApi(APIView):
             student = Student.objects.get(std_cnic=cnic)
             student_reg = StudentRegistration.objects.get(std_cnic=student)
             Internship_data = Internships.objects.get(registration_no=student_reg)
-            identity_data = IdentitycardProforma.objects.get(identity_id=Internship_data)
+            identity_data = IdentitycardProforma.objects.get(internship_id=Internship_data)
             Identity_serializer = IdentitycardProformaSerializer(identity_data)
             return Response(Identity_serializer.data,status=200)
         except Student.DoesNotExist:
@@ -1024,28 +1024,39 @@ class CaadTransportVerificationApi(APIView):
 
 class AccomodationProformaApi(APIView):
 
-    def get(self, request,id,*args, **kwargs):
+    def get(self, request, cnic,*args, **kwargs):
         try:
-            accomodation = AccomodationProforma.objects.select_related(
-            'internship__registration_no__std_cnic'
-             ).get(internship__registration_no__std_cnic=id)
-            Identitycard = accomodation.identity_card.identity_id
-            data = {
-                # 'std_cnic':accomodation.internship.registration_no.std_cnic.std_cnic,
-                'std_name': accomodation.internship.registration_no.std_cnic.std_name,
-                'ncp_assigned_regno': accomodation.internship.ncp_assigned_regno, 
-                'proposed_research_area': accomodation.internship.proposed_research_area,  
-                'proposed_research_end_time': accomodation.internship.proposed_research_end_time, 
-                'present_university_name': accomodation.internship.registration_no.present_university_name,
-                'std_phone_no': accomodation.internship.registration_no.std_cnic.std_phone_no,      
-                'landline_no': accomodation.internship.registration_no.landline_no,  
-                'identity_no':Identitycard,    
-            }
-            return Response(data)
+            student = Student.objects.get(std_cnic=cnic)
+            student_reg = StudentRegistration.objects.get(std_cnic=student)
+            Internship_data = Internships.objects.get(registration_no=student_reg)
+            accomodation_data = AccomodationProforma.objects.get(internship_id=Internship_data)
+            acc_serializer = AccomodationProformaSerializer(accomodation_data)
+            return Response(acc_serializer.data,status=200)
+        except Student.DoesNotExist:
+        # Handle the case where the student record doesn't exist
+            return Response(
+            {"res": "Student not found for CNIC: " + cnic},
+            status=404
+            )
+        except StudentRegistration.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student registration not found for CNIC: " + cnic},
+                status=404
+            )
+        except Internships.DoesNotExist:
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student Internships not found for CNIC: " + cnic},
+                status=404
+            )
         except AccomodationProforma.DoesNotExist:
-            return Response({'error': 'Accomodation Proforma not found'}, status=404)
-
-    
+            # Handle the case where the record doesn't exist
+            return Response(
+                {"res": "Student accommodation not found for CNIC: " + cnic},
+                status=404
+            )
+      
     def post(self, request):
         accomodation_prof_data = request.data
         try:
