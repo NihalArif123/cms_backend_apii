@@ -818,13 +818,15 @@ class LateSittingApi(APIView):
 
     def post(self, request, *args, **kwargs):
         latesitting_data = request.data
+        print(latesitting_data)
         try:
             std_cnic = latesitting_data['std_cnic']
         except KeyError:
             return Response({"message": "Missing std_cnic"}, status=400)
         internship=services.get_internship(std_cnic)
-        latesitting_data['internship']=internship
-        latesitting_serializer = LateSittingProformaSerializer(data=latesitting_data)
+        latesit_obj=LateSittingProforma()
+        latesit_obj.internship=internship
+        latesitting_serializer = LateSittingProformaSerializer(instance=latesit_obj,data=latesitting_data,partial=True)
         if latesitting_serializer.is_valid():
             latesitting=latesitting_serializer.save()
             caad_latesitting_verification_data = {
@@ -1248,14 +1250,16 @@ class ExtensionProformaApi(APIView):
 
     def post(self, request):
         extension_prof_data = request.data
+        print(extension_prof_data)
         try:
             std_cnic = extension_prof_data['std_cnic']
         except KeyError:
             return Response({"message": "Missing std_cnic"}, status=404)
 
         internship = services.get_internship(std_cnic)
-        extension_prof_data['internship'] = internship
-        extension_prof_serializer = ExtensionProformaSerializer(data=extension_prof_data)
+        ex_obj=ExtensionProforma()
+        ex_obj.internship=internship
+        extension_prof_serializer = ExtensionProformaSerializer(instance =ex_obj, data=extension_prof_data, partial=True)
         if extension_prof_serializer.is_valid():
             extension = extension_prof_serializer.save()
             caad_extension_verification_data = {
