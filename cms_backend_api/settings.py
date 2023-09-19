@@ -90,6 +90,13 @@ DATABASES = {
                 'driver': 'ODBC Driver 17 for SQL Server',
             },
         },
+        
+        # 'default': {
+        #     'ENGINE': 'mssql',
+        #     'NAME': 'cmscaad.bacpac',
+        #     'USER': 'laiba',
+        #     'PASSWORD': 'laiba123',
+        #     'HOST': 'LAIBA',
         # 'default': {
         #     'ENGINE': 'mssql',
         #     'NAME': 'cmscaad.bacpac',
@@ -102,7 +109,6 @@ DATABASES = {
         #     },
         # },
     }
-
 
 
 # Password validation
