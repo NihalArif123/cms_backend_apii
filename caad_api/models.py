@@ -11,14 +11,16 @@ from django.db import models
 class AccomodationProforma(models.Model):
     ac_id = models.AutoField(primary_key=True)
     internship = models.ForeignKey('Internships', models.DO_NOTHING)
-    identity_card = models.ForeignKey('IdentitycardProforma', models.DO_NOTHING)
+    identity= models.ForeignKey('IdentitycardProforma', models.DO_NOTHING)
     date_of_application = models.DateField()
     security_and_police_proforma = models.BooleanField()
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    challan_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    accomodation_start_date = models.DateField(blank=True, null=True)
+    accomodation_end_date = models.DateField(blank=True, null=True)
+    institute_type = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     pdf_form = models.BinaryField(blank=True, null=True)
-    
+
     class Meta:
         managed = False
         db_table = 'accomodation_proforma'
@@ -197,9 +199,10 @@ class ClearancePerforma(models.Model):
     reason_to_leave = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     identity = models.ForeignKey('IdentitycardProforma', models.DO_NOTHING)
+    apply_date = models.DateField(blank=True, null=True)
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     pdf_form = models.BinaryField(blank=True, null=True)
-
+    
     class Meta:
         managed = False
         db_table = 'clearance_performa'
@@ -289,7 +292,7 @@ class EvaluationProforma(models.Model):
 
 class ExtensionProforma(models.Model):
     extension_form_id = models.AutoField(primary_key=True)
-    approval_date = models.DateField(blank=True, null=True)
+    apply_date = models.DateField(blank=True, null=True)
     internship = models.ForeignKey('Internships', models.DO_NOTHING)
     reason_for_extension = models.CharField(max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS')
     reqperiod_ex_startdate = models.DateField()
@@ -348,9 +351,10 @@ class Internships(models.Model):
     is_supervisor_from_ncp = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     is_cosupervisor_from_ncp = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     consulted_date_of_ncp_supervisor = models.DateField(blank=True, null=True)
+    apply_date = models.DateField(blank=True, null=True)
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     pdf_form = models.BinaryField(blank=True, null=True)
-
+    
     class Meta:
         managed = False
         db_table = 'internships'
@@ -410,9 +414,10 @@ class LoginProforma(models.Model):
     mac_address = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     purpose_it_account = models.CharField(db_column='purpose_IT_account', max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)  # Field name made lowercase.
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    apply_date = models.DateField(blank=True, null=True)
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     pdf_form = models.BinaryField(blank=True, null=True)
-
+    
     class Meta:
         managed = False
         db_table = 'login_proforma'
@@ -539,7 +544,7 @@ class TransportMemberProforma(models.Model):
     transport_form_id = models.AutoField(primary_key=True)
     transport_application_date = models.DateField(blank=True, null=True)
     internship = models.ForeignKey(Internships, models.DO_NOTHING)
-    identity_card = models.ForeignKey(IdentitycardProforma, models.DO_NOTHING, blank=True, null=True)
+    identity = models.ForeignKey(IdentitycardProforma, models.DO_NOTHING, blank=True, null=True)
     transport_req_start_date = models.DateField(blank=True, null=True)
     transport_req_end_date = models.DateField(blank=True, null=True)
     pick_drop_point = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
