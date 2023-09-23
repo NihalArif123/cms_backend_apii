@@ -300,14 +300,11 @@ class ExtensionProforma(models.Model):
     accomodation = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS')
     transport = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS')
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-<<<<<<< HEAD
     recomendation=models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS')
     extension_apply_date = models.DateField(blank=True, null=True)
-=======
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     pdf_form = models.BinaryField(blank=True, null=True)
 
->>>>>>> upstream/main
     class Meta:
         managed = False
         db_table = 'extension_proforma'
