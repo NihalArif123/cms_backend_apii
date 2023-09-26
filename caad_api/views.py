@@ -544,33 +544,47 @@ class EvaluationProformaApi(APIView):
         return Response(Evaluation_serializer.data)
     def post(self, request, *args, **kwargs):
         Evaluations_data=request.data
+        print(Evaluations_data)
         try:
             std_cnic = Evaluations_data['std_cnic']
         except KeyError:
             return JsonResponse({"message": "Missing 'std_cnic' field in the request data"}, status=400)
-        internship_id=services.get_internship(std_cnic)
-        Evaluations_data['internship'] = internship_id
-        Evaluations_serializer = EvaluationProformaSerializer(data=Evaluations_data) 
+           
+        internship=services.get_internship(std_cnic)
+        eval_obj=EvaluationProforma()
+        eval_obj.internship=internship
+        eval_data={
+             'research_status': Evaluations_data['research_status'],
+             'research_title': Evaluations_data['research_title'],
+             'research_summary': Evaluations_data['research_summary'],
+             'evaluation_apply_date': Evaluations_data['evaluation_apply_date'],
+         }
+        pub_data={
+             'no_papers_published': Evaluations_data['no_papers_published'],
+             'no_papers_submitted': Evaluations_data['no_papers_submitted'],
+             'no_papers_accepted': Evaluations_data['no_papers_accepted'],
+             'no_papers_presented': Evaluations_data['no_papers_presented'],
+             'no_patents_submitted_national': Evaluations_data['no_patents_submitted_national'],
+             'no_patents_submitted_international': Evaluations_data['no_patents_submitted_international'],
+        }
+        Evaluations_serializer = EvaluationProformaSerializer(instance=eval_obj,data=eval_data,partial=True) 
         if Evaluations_serializer.is_valid():
-            evalaution=Evaluations_serializer.save()
-            publications_data = {
-                'evaluation': evalaution.evaluation_id,
-            }
+            evaluation=Evaluations_serializer.save()
+            pub_obj=EvaluationProforma()
+            pub_obj.evaluation= evaluation
+            publications_serializer = NcpPublicationsSerializer(instance=pub_obj,data=pub_data,partial=True) 
             caad_evaluation_verification_data = {
-                'evaluation': evalaution.evaluation_id,
+                'evaluation': evaluation.evaluation_id,
             }
             caad_evaluation_verification_serializer = CaadEvaluationVerificationSerializer(
                 data=caad_evaluation_verification_data
-            )
-            publications_serializer = NcpPublicationsSerializer(
-                data=publications_data
             )
             if caad_evaluation_verification_serializer.is_valid():
                 caad_evaluation_verification_serializer.save() 
             if publications_serializer.is_valid():
                 publications_serializer.save() 
             return Response("Insert Successfully", status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(Evaluations_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     def put(self, request,id, *args, **kwargs): 
         Evaluationsdata=EvaluationProforma.objects.get(evaluation_id=id)
         if not Evaluationsdata:
@@ -718,12 +732,33 @@ class ClearancePerformaApi(APIView):
             )
 
     def post(self, request, *args, **kwargs):
-        serializer = ClearancePerformaSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response("Insert Successfully", status=status.HTTP_201_CREATED)
+        clearance_data = request.data
+        print(clearance_data)
+        try:
+            std_cnic = clearance_data['std_cnic']
+        except KeyError:
+            return Response({"message": "Missing std_cnic"}, status=400)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        internship=services.get_internship(std_cnic)
+        internship=services.get_internship(std_cnic)
+        identity=services.get_identity(internship.internship_id)
+        clearance_obj=ClearancePerforma()
+        clearance_obj.internship=internship
+        clearance_obj.identity=identity
+        clearance_serializer = ClearancePerformaSerializer(instance =clearance_obj, data=clearance_data, partial=True)
+        if clearance_serializer.is_valid():
+            clearance=clearance_serializer.save()
+            caadclearnacesect_verification_data = {
+                'clearance': clearance.clearance_id,
+            }
+            caadclearancesectverification_serializer = CaadClearanceVerificationSerializer(
+                data=caadclearnacesect_verification_data
+            )
+            if caadclearancesectverification_serializer.is_valid():
+                caadclearancesectverification_serializer.save()
+            return Response(clearance_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(clearance_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+       
 
     def put(self, request, id, *args, **kwargs):
         ClearancePerforma_data=ClearancePerforma.objects.get(clearance_id=id)
@@ -883,11 +918,11 @@ class IdentitycardApi(APIView):
             return Response({"message": "Missing std_cnic"}, status=400)
 
         internship=services.get_internship(std_cnic)
-        identity_data['internship'] = internship.internship_id
-        identity_serializer = IdentitycardProformaSerializer(data=identity_data)
+        identity_obj=IdentitycardProforma()
+        identity_obj.internship= internship
+        identity_serializer = IdentitycardProformaSerializer(instance=identity_obj,data=identity_data,partial=True)
         if identity_serializer.is_valid():
             identity=identity_serializer.save()
-           
             caad_identity_verification_data = {
                 'identity': identity.identity_id,
             }

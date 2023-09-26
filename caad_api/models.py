@@ -199,8 +199,10 @@ class ClearancePerforma(models.Model):
     reason_to_leave = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     identity = models.ForeignKey('IdentitycardProforma', models.DO_NOTHING)
-    apply_date = models.DateField(blank=True, null=True)
-    remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    clearance_apply_date = models.DateField(blank=True, null=True)
+    date_to_leave = models.DateField(blank=True, null=True)
+    date_to_rejoin = models.DateField(blank=True, null=True)
+    date_to_join_parent_institute=models.DateField(blank=True, null=True)
     pdf_form = models.BinaryField(blank=True, null=True)
     
     class Meta:
@@ -277,13 +279,12 @@ class DocumentsUpload(models.Model):
 
 class EvaluationProforma(models.Model):
     evaluation_id = models.AutoField(primary_key=True)
-    date_of_submission = models.DateField(blank=True, null=True)
+    evaluation_apply_date = models.DateField(blank=True, null=True)
     internship = models.ForeignKey('Internships', models.DO_NOTHING)
     research_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     research_title = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     research_summary = models.CharField(max_length=250, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     pdf_form = models.BinaryField(blank=True, null=True)
 
     class Meta:
@@ -300,14 +301,11 @@ class ExtensionProforma(models.Model):
     accomodation = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS')
     transport = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS')
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-<<<<<<< HEAD
     recomendation=models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS')
     extension_apply_date = models.DateField(blank=True, null=True)
-=======
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     pdf_form = models.BinaryField(blank=True, null=True)
 
->>>>>>> upstream/main
     class Meta:
         managed = False
         db_table = 'extension_proforma'
@@ -408,6 +406,8 @@ class LateSittingProforma(models.Model):
 class LoginProforma(models.Model):
     login_form_id = models.AutoField(primary_key=True)
     internship = models.ForeignKey(Internships, models.DO_NOTHING)
+    nationality = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    passport_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     building = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     floor = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     room_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
@@ -483,7 +483,8 @@ class NcpPublications(models.Model):
     no_papers_accepted = models.IntegerField(blank=True, null=True)
     no_papers_submitted = models.IntegerField(blank=True, null=True)
     no_papers_presented = models.IntegerField(blank=True, null=True)
-    no_patents_submitted = models.IntegerField(blank=True, null=True)
+    no_patents_submitted_national = models.IntegerField(blank=True, null=True)
+    no_patents_submitted_international = models.IntegerField(blank=True, null=True)
     evaluation = models.ForeignKey(EvaluationProforma, models.DO_NOTHING)
 
     class Meta:

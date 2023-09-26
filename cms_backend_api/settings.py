@@ -79,37 +79,30 @@ WSGI_APPLICATION = 'cms_backend_api.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-        'default': {
-            'ENGINE': 'mssql',
-            'NAME': 'caad',
-            'USER': 'caad',
-            'PASSWORD': '(@@d@a$d(',
-            'HOST': '172.17.17.222',
-            'PORT': '',
-            'OPTIONS': {
-                'driver': 'ODBC Driver 17 for SQL Server',
-            },
-        },
-        
         # 'default': {
         #     'ENGINE': 'mssql',
-        #     'NAME': 'cmscaad.bacpac',
-        #     'USER': 'laiba',
-        #     'PASSWORD': 'laiba123',
-        #     'HOST': 'LAIBA',
-        # 'default': {
-        #     'ENGINE': 'mssql',
-        #     'NAME': 'cmscaad.bacpac',
-        #     'USER': 'amna',
-        #     'PASSWORD': 'amna1234',
-        #     'HOST': 'DESKTOP-N0C0S9S',
+        #     'NAME': 'caad',
+        #     'USER': 'caad',
+        #     'PASSWORD': '(@@d@a$d(',
+        #     'HOST': '172.17.17.222',
         #     'PORT': '',
         #     'OPTIONS': {
         #         'driver': 'ODBC Driver 17 for SQL Server',
         #     },
         # },
+        
+        'default': {
+            'ENGINE': 'mssql',
+            'NAME': 'cmscaad1.2',
+            'USER': 'amna',
+            'PASSWORD': 'amna1234',
+            'HOST': 'DESKTOP-N0C0S9S',
+            'PORT': '',
+            'OPTIONS': {
+                'driver': 'ODBC Driver 17 for SQL Server',
+            },
+        },
     }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
