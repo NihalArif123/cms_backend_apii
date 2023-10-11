@@ -10,7 +10,6 @@ from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.db.models import F
-
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
@@ -100,67 +99,65 @@ class verify_code(APIView):
                 return Response({"res":"student not"},status=400)
         except Exception as e:
             
-            
             return Response({"res": "An error occurred while verifying the verification code"}, status=500)
 
 class studentPictures(APIView):
     def get(self, request, cnic, *args, **kwargs):
         try:
-            # Fetch the StudentPictures instance for the given CNIC
-            stdpics = StudentPictures.objects.filter(std_cnic=cnic).first()
+        # Fetch the StudentPictures instance for the given CNIC
+            stdpics = StudentPictures.objects.filter(std_cnic=cnic)
 
-            if stdpics is not None and stdpics.image is not None:
+            if stdpics is not None:
                 # Serialize the image data using the serializer
-                serializer = StudentPicturesSerializer(stdpics)
+                serializer = StudentPicturesSerializer(stdpics, many=True)
 
                 # Retrieve the serialized data
                 serialized_data = serializer.data
 
                 # Get the binary image data from the serialized data
-                image_data = serialized_data.get('image')
+                image_data = serialized_data[0].get('image')
 
                 # Create a response containing the binary image data
-                response = Response(image_data, content_type='image/jpeg')  # Modify content_type as needed
+                response = Response(serialized_data, status=200)
+                response['Content-Type'] = 'application/json'
 
                 return response
             else:
                 return Response({"error": "Image not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        # def get(self, request, cnic, *args, **kwargs):
-        
-        #     stdpics = StudentPictures.objects.filter(std_cnic=cnic).first()
 
-        #     # Serialize the StudentPictures instance
-        #     serializer = StudentPicturesSerializer(stdpics)
-
-        #     return Response(serializer.data, status=status.HTTP_200_OK)
-        # except StudentPictures.DoesNotExist:
-        #     return Response({"error": "Student Pictures not found"}, status=status.HTTP_404_NOT_FOUND)
-        # except Exception as e:
-        #     return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request, *args, **kwargs):
         try:
-            # Validate and deserialize the incoming data using the serializer
-            serializer = StudentPicturesSerializer(data=request.data)
-            if serializer.is_valid():
-                # Save the deserialized data to the database
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # If the object doesn't exist, create a new instance
+                stdpics=StudentPictures()
+                student=Student(std_cnic=request.data.get('std_cnic'))
+                stdpics.std_cnic=student
+                image = request.FILES['image']
+                file_content = image.read()
+                stdpics.image= file_content
+                stdpics.img_name=request.data.get('img_name')
+                serializer = StudentPicturesSerializer(instance=stdpics,data= request.data,partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"res": "An error occurred while saving picture"}, status=500)
+
 
     def put(self, request, cnic, *args, **kwargs):
-        print("put called", cnic)
+        
         stdpics_data = StudentPictures.objects.filter(std_cnic=cnic).first()
-
+        print(stdpics_data.std_cnic)
         if stdpics_data is not None:
+            
             image = request.FILES['image']
             file_content = image.read()
             stdpics_data.image= file_content
+            stdpics_data.img_name=request.data.get('img_name')
 
             serializer = StudentPicturesSerializer(instance=stdpics_data,data= request.data,partial=True)
             if serializer.is_valid():
@@ -173,48 +170,58 @@ class studentPictures(APIView):
 class documentsUpload(APIView):
     def get(self, request, cnic, *args, **kwargs):
         try:
-            docs = DocumentsUpload.objects.filter(std_cnic=cnic).first()
+        # Fetch the Documents instance for the given CNIC
+            docs = DocumentsUpload.objects.filter(std_cnic=cnic)
 
-            # Serialize the StudentPictures instance
-            serializer = DocumentsUploadSerializer(docs)
+            if docs is not None:
+                # Serialize the image data using the serializer
+                serializer = DocumentsUploadSerializer(docs, many=True)
 
-            return Response(serializer.data, content_type='image/jpeg', status=status.HTTP_200_OK)
-        except documentsUpload.DoesNotExist:
-            return Response({"error": "Documents not found"}, status=status.HTTP_404_NOT_FOUND)
+                # Retrieve the serialized data
+                serialized_data = serializer.data
+
+                # Get the binary image data from the serialized data
+                image_data_list = [item.get('image') for item in serialized_data]
+
+
+                # Create a response containing the binary image data
+                response = Response(serialized_data, status=200)
+                response['Content-Type'] = 'application/json'
+
+                return response
+            else:
+                return Response({"error": "Image not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request, *args, **kwargs):
-       
-            cnic = request.data.get('std_cnic')  # Assuming 'cnic' is the field containing the CNIC
-            # Check if a record with the given CNIC exists
-            existing_record = DocumentsUpload.objects.filter(std_cnic=cnic).first()
-
-            if existing_record:
-            # If a record with the CNIC exists, update it with the new data
-                serializer = DocumentsUploadSerializer(existing_record, data=request.data)
-            else:
-                # If no record with the CNIC exists, create a new record
-                serializer = DocumentsUploadSerializer(data=request.data)
-
+            docs_data=DocumentsUpload()
+            student=Student(std_cnic=request.data.get('std_cnic'))
+            docs_data.std_cnic = student
+            image = request.FILES['image']
+            file_content = image.read()
+            docs_data.image= file_content
+            docs_data.img_name=request.data.get('img_name') 
+            document=Documents(doc_id=request.data.get('doc'))
+            docs_data.doc=document
+            serializer = DocumentsUploadSerializer(instance=docs_data,data= request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
        
-
 
     def put(self, request, cnic, *args, **kwargs):
         print("put called", cnic)
-        docs_data = DocumentsUpload.objects.filter(std_cnic=cnic).first()
+        docs_data = DocumentsUpload.objects.filter(uploaddoc_id=request.data.get('uploaddoc_id'),std_cnic=cnic).first()
 
         if docs_data is not None:
             image = request.FILES['image']
             file_content = image.read()
             docs_data.image= file_content
+            docs_data.img_name=request.data.get('img_name')
 
-            serializer = DocumentsUpload.Serializer(instance=docs_data,data= request.data,partial=True)
+            serializer = DocumentsUploadSerializer(instance=docs_data,data= request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -224,15 +231,6 @@ class documentsUpload(APIView):
 
 
 class studentApi(APIView):
-    # def get(self, request, *args, **kwargs):
-    #     students = Student.objects.all()
-    #     if not students:
-    #         return Response(
-    #             {"res": "Students not found"},
-    #             status=status.HTTP_400_BAD_REQUEST
-    #         )
-    #     students_serializer = StudentSerializer(students,many=True)
-    #     return Response(students_serializer.data,status=status.HTTP_200_OK)
     def get(self, request, cnic,*args, **kwargs):
         students= Student.objects.get(std_cnic=cnic)
         if not students:
