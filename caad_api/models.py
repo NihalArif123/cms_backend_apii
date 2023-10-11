@@ -204,6 +204,8 @@ class ClearancePerforma(models.Model):
     date_to_rejoin = models.DateField(blank=True, null=True)
     date_to_join_parent_institute=models.DateField(blank=True, null=True)
     pdf_form = models.BinaryField(blank=True, null=True)
+    remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+
     
     class Meta:
         managed = False
@@ -286,6 +288,7 @@ class EvaluationProforma(models.Model):
     research_summary = models.CharField(max_length=250, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     pdf_form = models.BinaryField(blank=True, null=True)
+    remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
 
     class Meta:
         managed = False
@@ -312,7 +315,7 @@ class ExtensionProforma(models.Model):
 
 
 class HostedresearcherCategory(models.Model):
-    category_id = models.IntegerField(primary_key=True)
+    category_id = models.AutoField(primary_key=True)
     category_name = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
 
     class Meta:
@@ -357,6 +360,7 @@ class Internships(models.Model):
     apply_date = models.DateField(blank=True, null=True)
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     pdf_form = models.BinaryField(blank=True, null=True)
+    father_name= models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     
     class Meta:
         managed = False
@@ -420,7 +424,7 @@ class LoginProforma(models.Model):
     mac_address = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     purpose_it_account = models.CharField(db_column='purpose_IT_account', max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)  # Field name made lowercase.
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    apply_date = models.DateField(blank=True, null=True)
+    account_apply_date = models.DateField(blank=True, null=True)
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     pdf_form = models.BinaryField(blank=True, null=True)
     
