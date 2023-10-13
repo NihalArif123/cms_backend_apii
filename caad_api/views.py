@@ -13,8 +13,9 @@ from django.db.models import F
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
-
-
+from PyPDF2 import PdfReader
+import io 
+from django.core.files.uploadedfile import InMemoryUploadedFile
 class login(APIView):
     def post(self, request, *args, **kwargs):
         try:
@@ -195,22 +196,46 @@ class documentsUpload(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request, *args, **kwargs):
-            docs_data=DocumentsUpload()
-            student=Student(std_cnic=request.data.get('std_cnic'))
-            docs_data.std_cnic = student
-            image = request.FILES['image']
-            file_content = image.read()
-            docs_data.image= file_content
-            docs_data.img_name=request.data.get('img_name') 
-            document=Documents(doc_id=request.data.get('doc'))
-            docs_data.doc=document
-            serializer = DocumentsUploadSerializer(instance=docs_data,data= request.data,partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-       
+            try:
+                docs_data = DocumentsUpload()
+                student = Student(std_cnic=request.data.get('std_cnic'))
+                docs_data.std_cnic = student
+                image = request.FILES['image']
 
+                if image.content_type == 'application/pdf':
+                    pdf_reader = PdfReader(image)
+                    pdf_content = ''
+                    for page in pdf_reader.pages:
+                        pdf_content += page.extract_text()
+
+                    # Encode the PDF content as bytes before storing it
+                    pdf_content_bytes = pdf_content.encode('utf-8')
+
+                    # Store the PDF content as bytes in the image field
+                    docs_data.image = bytes(pdf_content_bytes)
+                else:
+                    file_content = image.read()
+                    docs_data.image = file_content
+
+                docs_data.img_name = request.data.get('name')
+
+                try:
+                    document = Documents.objects.get(doc_id=request.data.get('doc'))
+                    docs_data.doc = document
+                except Documents.DoesNotExist:
+                    return Response({'error': 'Document with the given doc_id does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+
+                docs_data.save()
+                serializer = DocumentsUploadSerializer(instance=docs_data, data=request.data, partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+       
     def put(self, request, cnic, *args, **kwargs):
         print("put called", cnic)
         docs_data = DocumentsUpload.objects.filter(uploaddoc_id=request.data.get('uploaddoc_id'),std_cnic=cnic).first()
@@ -219,7 +244,7 @@ class documentsUpload(APIView):
             image = request.FILES['image']
             file_content = image.read()
             docs_data.image= file_content
-            docs_data.img_name=request.data.get('img_name')
+            docs_data.img_name=request.data.get('name')
 
             serializer = DocumentsUploadSerializer(instance=docs_data,data= request.data,partial=True)
             if serializer.is_valid():
@@ -452,6 +477,7 @@ class InternshipsApi(APIView):
             'is_supervisor_from_ncp': Internships_data['is_supervisor_from_ncp'],
             'is_cosupervisor_from_ncp': Internships_data['is_cosupervisor_from_ncp'],
             'consulted_date_of_ncp_supervisor': Internships_data['consulted_date_of_ncp_supervisor'],
+            'apply_date':Internships_data['apply_date']
         }
         internship_obj=Internships()
         internship_obj.university_supervisor=university_supervisor
