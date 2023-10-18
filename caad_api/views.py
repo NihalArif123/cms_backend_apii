@@ -188,7 +188,6 @@ class documentsUpload(APIView):
                 # Create a response containing the binary image data
                 response = Response(serialized_data, status=200)
                 response['Content-Type'] = 'application/json'
-
                 return response
             else:
                 return Response({"error": "Image not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -201,30 +200,19 @@ class documentsUpload(APIView):
                 student = Student(std_cnic=request.data.get('std_cnic'))
                 docs_data.std_cnic = student
                 image = request.FILES['image']
-
                 if image.content_type == 'application/pdf':
-                    pdf_reader = PdfReader(image)
-                    pdf_content = ''
-                    for page in pdf_reader.pages:
-                        pdf_content += page.extract_text()
-
-                    # Encode the PDF content as bytes before storing it
-                    pdf_content_bytes = pdf_content.encode('utf-8')
-
-                    # Store the PDF content as bytes in the image field
-                    docs_data.image = bytes(pdf_content_bytes)
+                    pdf_read=image.read()
+                    docs_data.image = pdf_read
                 else:
                     file_content = image.read()
                     docs_data.image = file_content
-
-                docs_data.img_name = request.data.get('name')
-
                 try:
                     document = Documents.objects.get(doc_id=request.data.get('doc'))
                     docs_data.doc = document
                 except Documents.DoesNotExist:
                     return Response({'error': 'Document with the given doc_id does not exist.'}, status=status.HTTP_404_NOT_FOUND)
 
+                docs_data.img_name = request.data.get('name')
                 docs_data.save()
                 serializer = DocumentsUploadSerializer(instance=docs_data, data=request.data, partial=True)
                 if serializer.is_valid():
@@ -567,36 +555,51 @@ class EvaluationProformaApi(APIView):
             )
         return Response(Evaluation_serializer.data)
     def post(self, request, *args, **kwargs):
-        Evaluations_data=request.data
+        Evaluations_data = request.data
         print(Evaluations_data)
+
+        # Check for 'std_cnic' field in the request data
+        std_cnic = Evaluations_data.get('std_cnic')
+        if not std_cnic:
+            return JsonResponse({"error": "Missing 'std_cnic' field in the request data"}, status=400)
+
+        # Retrieve internship using the 'std_cnic'
         try:
-            std_cnic = Evaluations_data['std_cnic']
-        except KeyError:
-            return JsonResponse({"message": "Missing 'std_cnic' field in the request data"}, status=400)
-           
-        internship=services.get_internship(std_cnic)
-        eval_obj=EvaluationProforma()
-        eval_obj.internship=internship
-        eval_data={
-             'research_status': Evaluations_data['research_status'],
-             'research_title': Evaluations_data['research_title'],
-             'research_summary': Evaluations_data['research_summary'],
-             'evaluation_apply_date': Evaluations_data['evaluation_apply_date'],
-         }
-        pub_data={
-             'no_papers_published': Evaluations_data['no_papers_published'],
-             'no_papers_submitted': Evaluations_data['no_papers_submitted'],
-             'no_papers_accepted': Evaluations_data['no_papers_accepted'],
-             'no_papers_presented': Evaluations_data['no_papers_presented'],
-             'no_patents_submitted_national': Evaluations_data['no_patents_submitted_national'],
-             'no_patents_submitted_international': Evaluations_data['no_patents_submitted_international'],
+            internship = services.get_internship(std_cnic)
+        except YourServiceException as e:  # Replace YourServiceException with the actual exception
+            return JsonResponse({"error": f"Error retrieving internship: {str(e)}"}, status=500)
+
+        eval_data = {
+            'research_status': Evaluations_data.get('research_status'),
+            'research_title': Evaluations_data.get('research_title'),
+            'research_summary': Evaluations_data.get('research_summary'),
+            'evaluation_apply_date': Evaluations_data.get('evaluation_apply_date'),
         }
-        Evaluations_serializer = EvaluationProformaSerializer(instance=eval_obj,data=eval_data,partial=True) 
-        if Evaluations_serializer.is_valid():
-            evaluation=Evaluations_serializer.save()
-            pub_obj=EvaluationProforma()
-            pub_obj.evaluation= evaluation
-            publications_serializer = NcpPublicationsSerializer(instance=pub_obj,data=pub_data,partial=True) 
+
+        pub_data = {
+            'no_papers_published': Evaluations_data.get('no_papers_published', 0),
+            'no_papers_submitted': Evaluations_data.get('no_papers_submitted', 0),
+            'no_papers_accepted': Evaluations_data.get('no_papers_accepted', 0),
+            'no_papers_presented': Evaluations_data.get('no_papers_presented', 0),
+            'no_patents_submitted_national': Evaluations_data.get('no_patents_submitted_national', 0),
+            'no_patents_submitted_international': Evaluations_data.get('no_patents_submitted_international', 0),
+        }
+
+        eval_obj = EvaluationProforma(internship=internship, **eval_data)
+        evaluations_serializer = EvaluationProformaSerializer(instance=eval_obj, data=eval_data, partial=True)
+
+        if evaluations_serializer.is_valid():
+            evaluation = evaluations_serializer.save()
+
+            # Create and save NcpPublications
+            pub_obj = NcpPublications(evaluation=evaluation, **pub_data)
+            publications_serializer = NcpPublicationsSerializer(instance=pub_obj, data=pub_data, partial=True)
+            if publications_serializer.is_valid():
+                publications_serializer.save()
+            else:
+                return Response({"error": publications_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create and save CaadEvaluationVerification
             caad_evaluation_verification_data = {
                 'evaluation': evaluation.evaluation_id,
             }
@@ -604,11 +607,13 @@ class EvaluationProformaApi(APIView):
                 data=caad_evaluation_verification_data
             )
             if caad_evaluation_verification_serializer.is_valid():
-                caad_evaluation_verification_serializer.save() 
-            if publications_serializer.is_valid():
-                publications_serializer.save() 
-            return Response("Insert Successfully", status=status.HTTP_201_CREATED)
-        return Response(Evaluations_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                caad_evaluation_verification_serializer.save()
+            else:
+                return Response({"error": caad_evaluation_verification_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({"message": "Insert Successful"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"error": evaluations_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     def put(self, request,id, *args, **kwargs): 
         Evaluationsdata=EvaluationProforma.objects.get(evaluation_id=id)
         if not Evaluationsdata:
@@ -1087,6 +1092,7 @@ class LateSittingApi(APIView):
         latesit_obj=LateSittingProforma()
         latesit_obj.internship=internship
         latesitting_serializer = LateSittingProformaSerializer(instance=latesit_obj,data=latesitting_data,partial=True)
+        print(latesit_obj)
         if latesitting_serializer.is_valid():
             latesitting=latesitting_serializer.save()
             caad_latesitting_verification_data = {
@@ -1648,16 +1654,19 @@ class LoginProformaApi(APIView):
 
     def post(self, request):
         login_prof_data = request.data
+        print(login_prof_data)
         try:
             std_cnic = login_prof_data['std_cnic']
         except KeyError:
             return Response({"message": "Missing std_cnic"}, status=404)
 
         internship = services.get_internship(std_cnic)
-        login_prof_data['internship'] = internship
-        login_prof_serializer = LoginProformaSerializer(data=login_prof_data)
+        login_obj=LoginProforma()
+        login_obj.internship=internship
+        login_prof_serializer = LoginProformaSerializer(instance=login_obj,data=login_prof_data,partial=True)
         if login_prof_serializer.is_valid():
             login = login_prof_serializer.save()
+            print("LOgin",login)
             it_dept_data = {
                 'login_form': login.login_form_id,
             }

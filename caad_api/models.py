@@ -271,7 +271,7 @@ class DocumentsUpload(models.Model):
     uploaddoc_id = models.AutoField(db_column='uploadDoc_id', primary_key=True)  # Field name made lowercase.
     image = models.BinaryField(blank=True, null=True)
     std_cnic = models.ForeignKey('Student', models.DO_NOTHING, db_column='std_cnic')
-    doc = models.ForeignKey('Documents', models.DO_NOTHING)
+    doc = models.ForeignKey(Documents, models.DO_NOTHING)
     img_name = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
 
     class Meta:
@@ -390,8 +390,8 @@ class LateSittingProforma(models.Model):
     latesitting_reason = models.CharField(max_length=150, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     workarea_during_latework = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     lab_contact_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    latesitting_startdate = models.DateField(blank=True, null=True)
-    latesitting_enddate = models.DateField(blank=True, null=True)
+    latesitting_startdate = models.TimeField(blank=True, null=True)
+    latesitting_enddate = models.TimeField(blank=True, null=True)
     emergency_contact_name = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     emergency_contact_number = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     emergency_contact_landline = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
@@ -412,6 +412,7 @@ class LoginProforma(models.Model):
     building = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     floor = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     room_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    telephoneOffice = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     window_login_account = models.BooleanField(blank=True, null=True)
     email_account = models.BooleanField(blank=True, null=True)
     print_quota = models.BooleanField()
@@ -423,7 +424,6 @@ class LoginProforma(models.Model):
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     account_apply_date = models.DateField(blank=True, null=True)
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    pdf_form = models.BinaryField(blank=True, null=True)
     nationality = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     passport_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
 

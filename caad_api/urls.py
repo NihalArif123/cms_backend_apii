@@ -55,10 +55,8 @@ urlpatterns = [
     path('extension/<str:cnic>', ExtensionProformaApi.as_view()),
     path('caadextension', CaadExtensionVerificationApi.as_view(), name="CaadExtensionVerificationApi"),
     path('caadextension/<int:pk>', CaadExtensionVerificationApi.as_view()),
-    path('login', LoginProformaApi.as_view(), name="LoginProformaApi"),
-    path('login/<str:cnic>', LoginProformaApi.as_view()),
+    path('account', LoginProformaApi.as_view(), name="LoginProformaApi"),
+    path('account/<str:cnic>', LoginProformaApi.as_view(), name="LoginProformaApiWithCnic"),
     path('itlogin', ItDeptLoginApi.as_view(), name="ItDeptLoginApi"),
     path('itlogin/<int:pk>', ItDeptLoginApi.as_view()), 
-
-  
 ]
