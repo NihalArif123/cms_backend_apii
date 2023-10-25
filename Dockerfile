@@ -2,49 +2,43 @@
 FROM python:3.10-slim
 
 # Update and upgrade libraries, and remove apt cache
-RUN apt-get clean all && apt-get update && apt-get upgrade -y && apt-get install make libaio1 && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get clean all && apt-get update && apt-get upgrade -y && apt-get install -y curl sudo make && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install required packages
-RUN apt-get update && apt-get install -y unixodbc unixodbc-dev freetds-dev odbcinst
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
+RUN curl https://packages.microsoft.com/config/debian/11/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
 
-# Configure ODBC driver
-RUN echo "[ODBC Driver 17 for SQL Server]" >> /etc/odbcinst.ini && \
-    echo "Description=Microsoft ODBC Driver 17 for SQL Server" >> /etc/odbcinst.ini && \
-    echo "Driver=/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so" >> /etc/odbcinst.ini && \
-    echo "UsageCount=1" >> /etc/odbcinst.ini
-RUN odbcinst -j 
-RUN cat /etc/odbcinst.ini
+RUN apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18 && apt-get install -y  unixodbc unixodbc-dev libgssapi-krb5-2
+
+RUN echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc && . ~/.bashrc
 
 # Create a new user and group
 RUN groupadd -r caad && useradd -r -g caad caad
-
+RUN echo 'caad ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/caad-nopasswd
 WORKDIR /home/caad
 # Copy the requirements file to the working directory
 
 COPY . .
 
+#RUN bash install_driver.sh
+
 # Update pip without caching anything
 RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt 
 
-# Set ownership of the working directory to the new user
 RUN chown -R caad:caad /home/caad
-
 
 # Switch to the new user
 USER caad
 
+#RUN sudo echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> /home/caad/.bashrc && source /home/caad/.bashrc
+
 # Set environment variables (modify as needed)a
-#ENV DJANGO_SETTINGS_MODULE=icms_teams.settings
+
 #ENV PYTHONUNBUFFERED=1
 
 # Expose the port on which the Django app will run (modify if needed)
 EXPOSE 8000/tcp
 
-# Run the Django development server when the container starts
-
-
 # Set the entrypoint to execute "make" with arguments
 ENTRYPOINT ["make"]
-
-# Set the default command to "run"
 CMD ["run-gunicorn"]
+#CMD bash
