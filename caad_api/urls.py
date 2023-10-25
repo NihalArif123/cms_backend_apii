@@ -27,7 +27,7 @@ urlpatterns = [
     path('caadreg', CaadRegistrationVerificationApi.as_view()),
     path('caadreg/<int:id>', CaadRegistrationVerificationApi.as_view()),
     path('send-verification-email', send_verification_email.as_view()),
-   path('verify-code',verify_code.as_view()),
+    path('verify-code',verify_code.as_view()),
     path('login',login.as_view()),
     path('identity', IdentitycardApi.as_view(), name='IdentitycardApi'),  
     path('identity/<str:cnic>', IdentitycardApi.as_view(), name='IdentitycardApi'),

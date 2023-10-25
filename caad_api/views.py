@@ -13,9 +13,9 @@ from django.db.models import F
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
-from PyPDF2 import PdfReader
-import io 
-from django.core.files.uploadedfile import InMemoryUploadedFile
+#from PyPDF2 import PdfReader
+#import io 
+#from django.core.files.uploadedfile import InMemoryUploadedFile
 class login(APIView):
     def post(self, request, *args, **kwargs):
         try:

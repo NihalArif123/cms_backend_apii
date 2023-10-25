@@ -22,9 +22,4 @@ urlpatterns = [
 
     path('api-auth/', include('rest_framework.urls')),
     path('', include('caad_api.urls')),
-
-   path('', include('caad_api.urls')),
-    path('api-auth/', include('rest_framework.urls')),
-
-
 ]
