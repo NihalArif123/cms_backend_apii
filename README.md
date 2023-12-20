@@ -8,7 +8,7 @@ pip install python
 python -m venv myvenv
 
 
-
+made sone changess here 
  # run virtual env
 myvenv\Scripts\activate
 
