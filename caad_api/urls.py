@@ -1,26 +1,28 @@
 from django.urls import path
 from .views import *
 
-urlpatterns = [ 
-    path('student', studentApi.as_view()),
+urlpatterns = [
+     
+    
     path('student/<str:cnic>', studentApi.as_view()),
+    path('student', studentApi.as_view()),
     path('studentpic', studentPictures.as_view()),
     path('studentpic/<str:cnic>', studentPictures.as_view()),
     path('docs', documentsUpload.as_view()),
     path('docs/<str:cnic>', documentsUpload.as_view()),
     path('studentreg', studentRegistrationApi.as_view()),
     path('studentreg/<str:cnic>', studentRegistrationApi.as_view()),
-    path('internships/<str:cnic>', InternshipsApi.as_view()),
-    path('internships',InternshipsApi.as_view()),
+    path('internships/<str:cnic>', InternshipsApi.as_view(),name='InternshipsApi'),
+    path('internships',InternshipsApi.as_view(),name='InternshipsApi'),
     path('evaluation', EvaluationProformaApi.as_view()),
     path('evaluation/<str:cnic>', EvaluationProformaApi.as_view()),
     path('caadevaluation', CaadEvaluationVerificationApi.as_view()),
     path('caadevaluation/<int:id>', CaadEvaluationVerificationApi.as_view()),
     path('caadclearance', CaadClearanceVerificationApi.as_view()),
     path('caadclearance/<int:id>', CaadClearanceVerificationApi.as_view()),
-    path('publications', NcpPublicationsApi.as_view()),
-    path('publications/<int:id>', NcpPublicationsApi.as_view()),
-    path('clearance', ClearancePerformaApi.as_view()),
+    path('publications', NcpPublications.as_view()),
+    path('publications/<int:id>', NcpPublications.as_view()),
+    path('clearance', ClearancePerformaApi.as_view(),name='ClearancePerformaApi'),
     path('clearance/<str:cnic>', ClearancePerformaApi.as_view()),
     path('dues', NcpDuesApi.as_view()),
     path('dues/<int:id>', NcpDuesApi.as_view()),
@@ -57,6 +59,13 @@ urlpatterns = [
     path('caadextension/<int:pk>', CaadExtensionVerificationApi.as_view()),
     path('account', LoginProformaApi.as_view(), name="LoginProformaApi"),
     path('account/<str:cnic>', LoginProformaApi.as_view(), name="LoginProformaApiWithCnic"),
+     path('account/<str:internship_id>', LoginProformaApi.as_view(), name="LoginProformaApiWithCnic"),
     path('itlogin', ItDeptLoginApi.as_view(), name="ItDeptLoginApi"),
     path('itlogin/<int:pk>', ItDeptLoginApi.as_view()), 
+    path('Adminlogin',Adminlogin.as_view()),
+    path('admin', AdminApi.as_view()),
+    path('admin/<str:cnic>', AdminApi.as_view()),
+    path('application-stats', ApplicationStatsApi.as_view(), name='application-stats'),
+     path('ncpdues', NcpDuesApi.as_view(), name='ncpdues'),
+   
 ]

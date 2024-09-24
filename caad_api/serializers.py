@@ -32,6 +32,7 @@ class CaadIdentityVerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CaadIdentityVerification
         fields = '__all__'
+        depth =1
 
 class CaadEvaluationVerificationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -111,6 +112,11 @@ class StudentSerializer(serializers.ModelSerializer):
         model = Student
         fields = '__all__'
 
+class AdminSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Admin
+        fields = '__all__'
 
 class StudentPicturesSerializer(serializers.ModelSerializer):
  
@@ -197,3 +203,4 @@ class UniversitySupervisorSerializer(serializers.ModelSerializer):
     class Meta:
         model = UniversitySupervisor
         fields = '__all__'
+      

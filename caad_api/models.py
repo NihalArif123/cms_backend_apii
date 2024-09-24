@@ -20,7 +20,7 @@ class AccomodationProforma(models.Model):
     accomodation_end_date = models.DateField(blank=True, null=True)
     institute_type = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    pdf_form = models.BinaryField(blank=True, null=True)
+    
 
     class Meta:
         managed = False
@@ -150,6 +150,10 @@ class CaadIdentityVerification(models.Model):
     security_particular_proforma = models.BooleanField(blank=True, null=True)
     police_verification_proforma = models.BooleanField(blank=True, null=True)
     identity = models.ForeignKey('IdentitycardProforma', models.DO_NOTHING)
+    dept_ncp = models.CharField(max_length=100, blank=True, null=True)
+    join_date = models.DateField(blank=True, null=True)
+    expiry_date = models.DateField(blank=True, null=True)
+    regno_verified = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -200,7 +204,6 @@ class ClearancePerforma(models.Model):
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     identity = models.ForeignKey('IdentitycardProforma', models.DO_NOTHING)
     clearance_apply_date = models.DateField(blank=True, null=True)
-    pdf_form = models.BinaryField(blank=True, null=True)
     date_to_leave = models.DateField(blank=True, null=True)
     date_to_rejoin = models.DateField(blank=True, null=True)
     date_to_join_parent_institute = models.DateField(blank=True, null=True)
@@ -286,7 +289,7 @@ class EvaluationProforma(models.Model):
     research_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     research_title = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     research_summary = models.CharField(max_length=250, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    pdf_form = models.BinaryField(blank=True, null=True)
+    
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
 
@@ -306,7 +309,7 @@ class ExtensionProforma(models.Model):
     transport = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS')
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     recomendation = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    pdf_form = models.BinaryField(blank=True, null=True)
+
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
 
     class Meta:
@@ -398,7 +401,6 @@ class LateSittingProforma(models.Model):
     attendant_during_latework = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     recommended_by_supervisor = models.BooleanField(blank=True, null=True)
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    pdf_form = models.BinaryField(blank=True, null=True)
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
 
     class Meta:
@@ -426,7 +428,7 @@ class LoginProforma(models.Model):
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     nationality = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     passport_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-
+    
     class Meta:
         managed = False
         db_table = 'login_proforma'
@@ -519,7 +521,16 @@ class Student(models.Model):
         managed = False
         db_table = 'student'
 
+class Admin(models.Model):
+    admin_cnic = models.CharField(primary_key=True, max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS')
+    admin_name = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    admin_id = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+   
+    admin_password = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
 
+    class Meta:
+        managed = False
+        db_table = 'admin'
 class StudentPictures(models.Model):
     std_pic_id = models.AutoField(primary_key=True)
     std_cnic = models.ForeignKey(Student, models.DO_NOTHING, db_column='std_cnic')
@@ -561,7 +572,6 @@ class TransportMemberProforma(models.Model):
     lab_contact_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
-    pdf_form = models.BinaryField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -580,3 +590,20 @@ class UniversitySupervisor(models.Model):
     class Meta:
         managed = False
         db_table = 'university_supervisor'
+class NcpDues(models.Model):
+    fee_id = models.AutoField(primary_key=True)
+    internship = models.ForeignKey('Internships', models.DO_NOTHING)
+    std_name = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    application_status = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    email = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    phone_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    submission_date = models.DateField(blank=True, null=True)
+    ncp_id_no = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    department = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    supervisor_from_ncp = models.CharField(max_length=10, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    fee_receipt_number = models.CharField(max_length=50, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    remarks = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
+    app_date = models.DateField(blank=True, null=True)
+    class Meta:
+        managed = False
+        db_table = 'ncpdues_sub'

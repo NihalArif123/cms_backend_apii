@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../cms_admin_gui"
+		},
+		{
+			"path": "../../../cms_frontend_gui"
+		}
+	],
+	"settings": {}
+}
